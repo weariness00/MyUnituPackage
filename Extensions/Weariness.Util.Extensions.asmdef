@@ -1,5 +1,5 @@
 {
-    "name": "Weariness.Extensions",
+    "name": "Weariness.Util.Extensions",
     "rootNamespace": "Weariness.Util",
     "references": [],
     "includePlatforms": [],
