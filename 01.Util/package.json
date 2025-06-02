@@ -1,0 +1,13 @@
+{
+  "name": "com.weariness.extensions",
+  "version": "1.0.0",
+  "displayName": "Extensions Utility",
+  "description": "확장 메서드 관련 유틸리티",
+  "unity": "2019.4",
+  "author": {
+    "name": "Weariness",
+    "email": "ehddn917@gmail.com"
+  },
+  "dependencies": {
+  }
+}
