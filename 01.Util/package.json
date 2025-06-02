@@ -1,0 +1,14 @@
+{
+  "name": "com.weariness.singleton",
+  "version": "1.0.0",
+  "displayName": "Singleton Utility",
+  "description": "싱글톤 유틸리티",
+  "unity": "2019.4",
+  "author": {
+    "name": "Weariness",
+    "email": "ehddn917@gmail.com"
+  },
+  "dependencies": {
+    // B가 의존하는 다른 패키지가 있으면 여기에 적음
+  }
+}
