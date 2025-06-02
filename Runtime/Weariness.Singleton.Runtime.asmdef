@@ -1,7 +1,9 @@
 {
     "name": "Weariness.Singleton.Runtime",
     "rootNamespace": "Weariness.Singleton",
-    "references": [],
+    "references": [
+        "GUID:21b0c8d1703a94250bfac916590cea4f"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
