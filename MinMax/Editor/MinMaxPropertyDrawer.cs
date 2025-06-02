@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+
 namespace Weariness.Util.Editor
 {
     [CustomPropertyDrawer(typeof(MinMax<int>))]
