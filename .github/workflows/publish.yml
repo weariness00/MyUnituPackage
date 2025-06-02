@@ -3,18 +3,18 @@ name: Publish MonoRepo Packages
 on:
   push:
     tags:
-      - 'Extension-v*.*.*'   # 예: Extension-v1.0.0
+      - 'Extensions-v*.*.*'   # 예: Extension-v1.0.0
       - 'Singleton-v*.*.*'   # 예: Singleton-v1.0.0
 
 jobs:
-  Extension:
+  Extensions:
     if: startsWith(github.ref, 'refs/tags/Extension-')
     runs-on: ubuntu-latest
     steps:
       - name: checkout Extension Branch
         uses: actions/checkout@v2
         with:
-          ref: Extension
+          ref: Extensions
           fetch-depth: 1
 
       - name: Set up Node.js
