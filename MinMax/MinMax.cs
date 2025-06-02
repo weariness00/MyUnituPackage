@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Util
+namespace Weariness.Util
 {
     [System.Serializable]
     public class MinMax<T>
