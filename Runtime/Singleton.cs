@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Unity.VisualScripting;
 
-namespace Util
+namespace Weariness.Util
 {
     public abstract class Singleton<T> : MonoBehaviour, ISingleton where T : Component, new()
     {
@@ -28,10 +28,14 @@ namespace Util
         {
             if (_instance == null)
             {
-                var componet = FindObjectOfType<T>();
-                if (componet != null)
+#if UNITY_6000_0_OR_NEWER
+                var component = FindAnyObjectByType<T>();
+#else
+                var component = FindObjectOfType<T>();
+#endif
+                if (component != null)
                 {
-                    _instance = componet;
+                    _instance = component;
                     if(_instance is Singleton<T> s1)
                         s1.Initialize();
                     DontDestroyOnLoad(_instance.gameObject);
