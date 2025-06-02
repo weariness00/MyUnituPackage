@@ -14,8 +14,10 @@ namespace Weariness.Util
             }
         }
         private static T _instance = null;
-        public static bool HasInstance => !ReferenceEquals(_instance, null);
+        public static bool IsDontDestroy = true;
+        public static bool HasInstance => _instance != null;
         public static void Make() => Init();
+
 
         public virtual void Awake()
         {
@@ -38,7 +40,7 @@ namespace Weariness.Util
                     _instance = component;
                     if(_instance is Singleton<T> s1)
                         s1.Initialize();
-                    DontDestroyOnLoad(_instance.gameObject);
+                    if(IsDontDestroy) DontDestroyOnLoad(_instance.gameObject);
                     return;
                 }
 
