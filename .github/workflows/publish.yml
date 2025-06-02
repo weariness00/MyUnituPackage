@@ -14,8 +14,8 @@ jobs:
       - name: checkout Extension Branch
         uses: actions/checkout@v2
         with:
-	  ref: Extension
-	  fetch-depth : 1
+          ref: Extension
+          fetch-depth: 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -38,8 +38,8 @@ jobs:
       - name: checkout Singleton Branch
         uses: actions/checkout@v2
         with:
-	  ref: Singleton
-	  fetch-depth : 1
+          ref: Singleton
+          fetch-depth: 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
