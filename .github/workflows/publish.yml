@@ -1,3 +1,12 @@
+name: Publish MonoRepo Packages
+
+on:
+  push:
+    tags:
+      - 'Extensions-v*.*.*'
+      - 'Singleton-v*.*.*'
+      # 필요시 더 추가
+
 jobs:
   publish-upm:
     runs-on: ubuntu-latest
