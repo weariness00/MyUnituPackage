@@ -1,32 +1,48 @@
-name: Publish MonoRepo Packages
+# .github/workflows/release-extensions.yml
+name: Release Extensions Package
 
 on:
   push:
-    tags:
-      - 'Extensions-v*.*.*'
+    branches:
+      - Extensions
+  workflow_dispatch:
 
 jobs:
-  Extensions:
-    if: startsWith(github.ref, 'refs/tags/Extensions-')
+  release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      # 1) 전체 히스토리와 태그를 가져와야 git tag & push 가능
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      # 2) Node.js 세팅 (package.json 읽기용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '18.x'
 
-      - run: npm cache clean --force
+      # 3) package.json 버전 읽기
+      - name: Read version
+        id: get_version
+        run: |
+          cd Packages/com.weariness.Extension
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - run: npm install -g openupm-cli
-
-      - name: Check openupm version
-        run: openupm --version && openupm --help
-
-      - name: Publish Extensions
+      # 4) 태그 생성 및 푸시
+      - name: Create & Push Git Tag
         env:
-          OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
-        run: openupm publish --access public
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=Extensions-v${{ steps.get_version.outputs.version }}
+          echo "🔖 Creating tag $TAG"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      # 5) 완료 메시지
+      - name: Done
+        run: echo "✅ Released Extensions version ${{ steps.get_version.outputs.version }}"
