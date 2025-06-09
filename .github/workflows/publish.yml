@@ -33,7 +33,7 @@ jobs:
       # 4) 태그 생성 및 푸시
       - name: Create & Push Git Tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.Unity_UPM_GITHUB_TOKEN }}
         run: |
           TAG=Extensions-v${{ steps.get_version.outputs.version }}
           echo "🔖 Creating tag $TAG"
