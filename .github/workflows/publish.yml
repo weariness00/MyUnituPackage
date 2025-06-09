@@ -3,52 +3,36 @@ name: Publish MonoRepo Packages
 on:
   push:
     tags:
-      - 'Extensions-v*.*.*'   # 예: Extensions-v1.0.0
-      - 'Singleton-v*.*.*'   # 예: Singleton-v1.0.0
+      - 'Extensions-v*.*.*'
+      - 'Singleton-v*.*.*'
+      # ... 필요시 더 추가
 
 jobs:
-  Extensions:
-    if: startsWith(github.ref, 'refs/tags/Extensions-')
+  publish-upm:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: Extensions
+            folder: ","
+            pattern: 'refs/tags/Extensions-'
+          - name: Singleton
+            folder: ","
+            pattern: 'refs/tags/Singleton-'
+    if: startsWith(github.ref, matrix.pattern)
     steps:
-      - name: checkout Extensions Branch
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
-          ref: Extensions
+          ref: ${{ github.ref }}
           fetch-depth: 1
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '18.x'
 
-      - name: Install OpenUPM CLI
-        run: npm install -g openupm-cli
+      - run: npm install -g openupm-cli
 
-      - name: Publish Extension=
-        env:
-          OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
-        run: openupm publish --access public
-
-  Singleton:
-    if: startsWith(github.ref, 'refs/tags/Singleton-')
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout Singleton Branch
-        uses: actions/checkout@v2
-        with:
-          ref: Singleton
-          fetch-depth: 1
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
-
-      - name: Install OpenUPM CLI
-        run: npm install -g openupm-cli
-
-      - name: Publish Singleton
+      - name: Publish ${{ matrix.name }}
         env:
           OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
         run: openupm publish --access public
