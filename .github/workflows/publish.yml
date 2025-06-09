@@ -21,7 +21,7 @@ jobs:
 
       - run: npm cache clean --force
 
-      - run: npm install -g openupm-cli@0.7.2
+      - run: npm install -g openupm-cli
 
       - name: Check openupm version
         run: openupm --version && openupm --help
