@@ -19,10 +19,14 @@ jobs:
         with:
           node-version: '18.x'
 
-      - run: npm install -g openupm-cli@latest
+      - run: npm cache clean --force
+
+      - run: npm install -g openupm-cli@0.7.2
+
+      - name: Check openupm version
+        run: openupm --version && openupm --help
 
       - name: Publish Extensions
         env:
           OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
         run: openupm publish --access public
-
