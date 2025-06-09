@@ -1,6 +1,9 @@
 # .github/workflows/release-extensions.yml
 name: Release Extensions Package
 
+permissions:
+  contents: write 
+
 on:
   push:
     branches:
