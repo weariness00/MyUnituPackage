@@ -27,7 +27,6 @@ jobs:
       - name: Read version
         id: get_version
         run: |
-          cd Packages/com.weariness.Extension
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
