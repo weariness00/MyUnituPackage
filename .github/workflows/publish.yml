@@ -1,43 +1,50 @@
-name: Publish MonoRepo Packages
+# .github/workflows/release-dataprefs.yml
+name: Release DataPrefs Package
+
+permissions:
+  contents: write 
 
 on:
   push:
-    tags:
-      - 'Extensions-v*.*.*'
-      - 'Singleton-v*.*.*'
-      # 필요시 더 추가
+    branches:
+      - DataPrefs
+  workflow_dispatch:
 
 jobs:
-  publish-upm:
+  release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: Extensions
-            folder: "."
-            pattern: 'refs/tags/Extensions-'
-          - name: Singleton
-            folder: "."
-            pattern: 'refs/tags/Singleton-'
     steps:
-      - uses: actions/checkout@v2
+      # 1) 전체 히스토리와 태그를 가져와야 git tag & push 가능
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      # 2) Node.js 세팅 (package.json 읽기용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '18.x'
 
-      - run: npm install -g openupm-cli
-
-      - name: Publish ${{ matrix.name }}
-        if: startsWith(github.ref, matrix.pattern)
-        env:
-          OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
+      # 3) package.json 버전 읽기
+      - name: Read version
+        id: get_version
         run: |
-          if [ "${{ matrix.folder }}" = "." ]; then
-            openupm publish --access public
-          else
-            (cd ${{ matrix.folder }} && openupm publish --access public)
-          fi
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # 4) 태그 생성 및 푸시
+      - name: Create & Push Git Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.Unity_UPM_GITHUB_TOKEN }}
+        run: |
+          TAG=DataPrefs-v${{ steps.get_version.outputs.version }}
+          echo "🔖 Creating tag $TAG"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      # 5) 완료 메시지
+      - name: Done
+        run: echo "✅ Released DataPrefs version ${{ steps.get_version.outputs.version }}"
