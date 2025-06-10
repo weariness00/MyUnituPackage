@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Util
+namespace Weariness.Util
 {
 #if UNITY_EDITOR
     [InitializeOnLoad]
