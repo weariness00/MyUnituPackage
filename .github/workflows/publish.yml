@@ -1,5 +1,5 @@
-# .github/workflows/release-dataprefs.yml
-name: Release DataPrefs Package
+# .github/workflows/release-csv.yml
+name: Release CSV Package
 
 permissions:
   contents: write 
@@ -7,7 +7,7 @@ permissions:
 on:
   push:
     branches:
-      - DataPrefs
+      - CSV
   workflow_dispatch:
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.Unity_UPM_GITHUB_TOKEN }}
         run: |
-          TAG=DataPrefs-v${{ steps.get_version.outputs.version }}
+          TAG=CSV-v${{ steps.get_version.outputs.version }}
           echo "🔖 Creating tag $TAG"
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
@@ -47,4 +47,4 @@ jobs:
 
       # 5) 완료 메시지
       - name: Done
-        run: echo "✅ Released DataPrefs version ${{ steps.get_version.outputs.version }}"
+        run: echo "✅ Released CSV version ${{ steps.get_version.outputs.version }}"
