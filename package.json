@@ -9,6 +9,6 @@
     "email": "ehddn917@gmail.com"
   },
   "dependencies": {
-    "com.weariness.extensions" : "git+https://github.com/weariness00/MyUnituPackage.git#Extensions"
+    "com.weariness.extensions" : "1.0.1"
   }
 }
