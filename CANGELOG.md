@@ -1,6 +1,5 @@
 # [1.1.0]
-## 2025-06-02
-### 첫 릴리즈
+## 2025-06-12
 
 - Addressable을 이용해서 자동 Load & Save가 동작하도록 구현
 - Addressable Version 2.2.2를 사용

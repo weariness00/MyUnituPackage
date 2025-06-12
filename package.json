@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.dataprefs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "DataPrefs Utility",
   "description": "DataPrefs Included In Build",
   "unity": "2019.4",
@@ -9,5 +9,6 @@
     "email": "ehddn917@gmail.com"
   },
   "dependencies": {
+    "com.unity.addressable" : "2.2.2"
   }
 }
