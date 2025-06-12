@@ -2,21 +2,58 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Weariness.Util
 {
-#if UNITY_EDITOR
-    [InitializeOnLoad]
-#endif
     public static class DataPrefs
     {
+        public static readonly string AddressableKey = "Weariness.Util/DataPrefs";
         private static string Name = "DataPrefs";
-        private static string filePath = Path.Combine(Application.dataPath, "Resources", Name + ".json");
-        private static Dictionary<string, string> prefs = new Dictionary<string, string>();
+        private static readonly string DefaultFilePath = "Packages/com.weariness.dataprefs/Setting/DataPrefs.json";
+        private static Dictionary<string, string> prefs;
 
         static DataPrefs()
         {
+            prefs = new Dictionary<string, string>();
             LoadPrefs();
+        }
+        
+        private static void SavePrefs()
+        {
+            string json = JsonUtility.ToJson(new Serialization<string, string>(prefs));
+
+#if UNITY_EDITOR
+            File.WriteAllText(
+                File.Exists(
+                    Path.Join(Application.dataPath, "Packages/com.weariness.dataprefs/Setting/DataPrefs.json")) ?
+                    DefaultFilePath :
+                    Path.Join(Application.dataPath, "Scripts/Setting/DataPrefs.json")
+                ,json);
+            AssetDatabase.ImportAsset(DefaultFilePath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.Refresh();
+#else
+            // 어드레서블로 불러와서 저장
+            
+#endif
+            Debug.Log($"[Editor] {DefaultFilePath} 내용이 갱신되었습니다.");
+        }
+
+        public static void LoadPrefs()
+        {
+            string json = "";
+#if UNITY_EDITOR
+            var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(DefaultFilePath) ?? AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Scripts/Setting/DataPrefs.json");
+            if(textAsset != null)
+                json = textAsset.text;
+#else
+            var handle = Addressables.LoadAssetAsync<TextAsset>(AddressableKey);
+            handle.WaitForCompletion();
+            var textAsset = handle.Result;
+            json = textAsset.text;
+#endif
+            if(json == "") return;
+            prefs = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
         }
         
         public static bool HasKey(string key) => prefs.ContainsKey(key);
@@ -78,26 +115,6 @@ namespace Weariness.Util
             }
 
             return defaultValue;
-        }
-
-        private static void SavePrefs()
-        {
-            string json = JsonUtility.ToJson(new Serialization<string, string>(prefs));
-            File.WriteAllText(filePath, json);
-        }
-
-        public static void LoadPrefs()
-        {
-            string json = "";
-#if UNITY_EDITOR
-            if (File.Exists(filePath))
-                json = File.ReadAllText(filePath);
-#else
-            var textAsset = Resources.Load<TextAsset>(Name);
-            json = textAsset != null ? textAsset.text : "";
-#endif
-            prefs = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
-            Debug.Assert(prefs != null, $"{Name} 데이터가 존재하지 않습니다. {json}");
         }
 
         [System.Serializable]
