@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -10,11 +11,13 @@ namespace Weariness.Util.Editor
     [InitializeOnLoad]
     public static class DataPrefsAddressableInitializer
     {
-        static DataPrefsAddressableInitializer() => Init();
+        static DataPrefsAddressableInitializer() => EditorApplication.delayCall += Init;
 
         private static void Init()
         {
             // 1) Settings asset을 패키지 내부에 만들거나 로드
+            EnsureAddressablesSetup();
+
             var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
 
             // 2) Group 생성 (이미 있으면 건너뜀)
@@ -23,7 +26,7 @@ namespace Weariness.Util.Editor
 
             if (group == null)
             {
-                settings.CreateGroup(groupName,
+                group = settings.CreateGroup(groupName,
                     false /*isDefault*/,
                     false /*readOnly*/,
                     false /*singleSchema*/,
@@ -49,14 +52,53 @@ namespace Weariness.Util.Editor
             {
                 var entry = settings.CreateOrMoveEntry(guid, group);
                 entry.address = DataPrefs.AddressableKey;
-                // 원하는 주소 지정
-                entry.address = Path.GetFileNameWithoutExtension(targetFilePath);
             }
 
             // 5) 저장
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            if (!string.IsNullOrEmpty(guid) && settings.FindAssetEntry(guid) == null)
+            {
+                Init();
+                return;
+            }
+
             Debug.Log("[DataPrefs] Addressable 설정이 완료되었습니다.");
+        }
+        
+        private static void EnsureAddressablesSetup()
+        {
+            if (AddressableAssetSettingsDefaultObject.Settings != null)
+                return;
+            
+            AddressableAssetSettingsDefaultObject.Settings = AddressableAssetSettings.Create(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder,
+                AddressableAssetSettingsDefaultObject.kDefaultConfigAssetName, true, true);
+                
+            var bundleList = AssetDatabase.GetAllAssetBundleNames();
+            if (AddressableAssetSettingsDefaultObject.Settings != null && bundleList.Length > 0)
+            {
+                var displayChoice = EditorUtility.DisplayDialog("Legacy Bundles Detected",
+                    "We have detected the use of legacy bundles in this project.  Would you like to auto-convert those into Addressables? \nThis will take each asset bundle you have defined (we have detected " +
+                    bundleList.Length +
+                    " bundles), create an Addressables group with a matching name, then move all assets from those bundles into corresponding groups.  This will remove the asset bundle assignment from all assets, and remove all asset bundle definitions from this project.  This cannot be undone.",
+                    "Convert", "Ignore");
+                if (displayChoice)
+                {
+                    var asm = typeof(AddressableAssetSettings).Assembly;
+                    var utilType = asm.GetType("UnityEditor.AddressableAssets.AddressableAssetUtility");
+                    var method = utilType?.GetMethod(
+                        "ConvertAssetBundlesToAddressables",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+
+                    if (method != null)
+                        method.Invoke(null, null);
+                    else
+                        Debug.LogError("[DataPrefs] AddressableAssetUtility.Convert… 메서드를 찾을 수 없습니다.");
+                }
+            }
+                
+            UnityEngine.Debug.Log("[AddressablesAutoSetup] Addressables 환경이 자동으로 구성되었습니다.");
         }
     }
 }
