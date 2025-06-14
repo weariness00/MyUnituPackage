@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Weariness.Util
+namespace Util
 {
     [System.Serializable]
     public enum MinMaxValueType
@@ -18,6 +18,19 @@ namespace Weariness.Util
     [System.Serializable]
     public class MinMaxValue<T> where T : struct, IComparable
     {
+        [SerializeField] private T _min;
+        [SerializeField] private T _max;
+        [SerializeField] private T _current;
+        [SerializeField] private bool _isMin;
+        [SerializeField] private bool _isMax;
+
+        public bool isOverMax; // 기존의 Max보다 높은 값을 허용 할 것인지
+        public bool isOverMin; // 기존의 Min보다 낮은 값을 허용 할 것인지
+        
+        public event Action<MinMaxValue<T>> onChangeValueMin;
+        public event Action<MinMaxValue<T>> onChangeValueMax;
+        public event Action<MinMaxValue<T>> onChangeValueCurrent;
+        
         public static implicit operator T(MinMaxValue<T> value)
         {
             return value.Current;
@@ -34,8 +47,12 @@ namespace Weariness.Util
             }
             set
             {
-                _current = value;
-                CheckCurrent();
+                if (_current.CompareTo(value) != 0)
+                {
+                    _current = value;
+                    CheckCurrent();
+                    onChangeValueCurrent?.Invoke(this);
+                }
             }
         }
         public T Min
@@ -43,8 +60,15 @@ namespace Weariness.Util
             get => _min;
             set
             {
-                _min = value; 
-                CheckCurrent();
+                if(_min.CompareTo(value) != 0)
+                {
+                    var prevCurrent = _current;
+                    _min = value; 
+                    CheckCurrent();
+                    onChangeValueMin?.Invoke(this);
+                    if (prevCurrent.CompareTo(_current) != 0)
+                        onChangeValueCurrent?.Invoke(this);
+                }
             }
         }
         
@@ -53,37 +77,21 @@ namespace Weariness.Util
             get => _max;
             set
             {
-                _max = value;
-                CheckCurrent();
+                if (_max.CompareTo(value) != 0)
+                {
+                    var prevCurrent = _current;
+                    _max = value;
+                    onChangeValueMax?.Invoke(this);
+                    CheckCurrent();
+                    if (prevCurrent.CompareTo(_current) != 0)
+                        onChangeValueCurrent?.Invoke(this);
+                }
             }
         }
         
-        [SerializeField] private T _min;
-        [SerializeField] private T _max;
-        [SerializeField] private T _current;
-        [SerializeField] private bool _isMin;
-        [SerializeField] private bool _isMax;
+        public bool IsMin => _isMin;
+        public bool IsMax => _isMax;
 
-        public bool isOverMax; // 기존의 Max보다 높은 값을 허용 할 것인지
-        public bool isOverMin; // 기존의 Min보다 낮은 값을 허용 할 것인지
-        public bool IsMin
-        {
-            get
-            {
-                CheckCurrent();
-                return _isMin;
-            }
-        }
-
-        public bool IsMax
-        {
-            get
-            {
-                CheckCurrent();
-                return _isMax;
-            }   
-        }
-        
         public MinMaxValue(bool _isOverMin = false, bool _isOverMax = false)
         {
             _current = default;
@@ -113,7 +121,12 @@ namespace Weariness.Util
             isOverMax = _isOverMax;
             CheckCurrent();
         }
-        
+
+        public override string ToString()
+        {
+            return $"{_current}({_min}~{_max})";
+        }
+
         void CheckCurrent()
         {
             _isMin = _isMax = false;
@@ -121,14 +134,20 @@ namespace Weariness.Util
             {
                 _isMin = _isMax = true;
             }
-            if (_current.CompareTo(_min) <= 0)
+            if (_current.CompareTo(_min) < 0)
             {
-                if(isOverMin == false) {_current = _min;}
+                if (isOverMin == false)
+                {
+                    _current = _min;
+                }
                 _isMin = true;
             }
-            else if (_current.CompareTo(_max) >= 0)
+            else if (_current.CompareTo(_max) > 0)
             {
-                if(isOverMax == false) {_current = _max;}
+                if (isOverMax == false)
+                {
+                    _current = _max;
+                }
                 _isMax = true;
             }
         }
@@ -180,12 +199,12 @@ namespace Weariness.Util
         {
             if (this is MinMaxValue<int> intValue)
             {
-                var normalized = Mathf.InverseLerp(intValue._min, intValue._max, intValue);
+                var normalized = Mathf.InverseLerp(intValue._min, intValue._max, intValue._current);
                 return Mathf.Lerp(min, max, normalized);
             }
             if (this is MinMaxValue<float> floatValue)
             {
-                var normalized = Mathf.InverseLerp(floatValue._min, floatValue._max, floatValue);
+                var normalized = Mathf.InverseLerp(floatValue._min, floatValue._max, floatValue._current);
                 return Mathf.Lerp(min, max, normalized);
             }
 
