@@ -134,7 +134,7 @@ namespace Util
             {
                 _isMin = _isMax = true;
             }
-            if (_current.CompareTo(_min) < 0)
+            if (_current.CompareTo(_min) <= 0)
             {
                 if (isOverMin == false)
                 {
@@ -142,7 +142,7 @@ namespace Util
                 }
                 _isMin = true;
             }
-            else if (_current.CompareTo(_max) > 0)
+            else if (_current.CompareTo(_max) >= 0)
             {
                 if (isOverMax == false)
                 {
