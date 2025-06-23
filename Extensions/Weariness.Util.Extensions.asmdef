@@ -1,7 +1,12 @@
 {
     "name": "Weariness.Util.Extensions",
     "rootNamespace": "Weariness.Util",
-    "references": [],
+    "references": [
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.TextMeshPro.Tests",
+        ""
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
