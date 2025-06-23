@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Util.Editor
+namespace Weariness.Util.Editor
 {
     [CustomPropertyDrawer(typeof(MinMaxValue<float>))]
     public class MinMaxValueFloatPropertyDrawer : PropertyDrawer

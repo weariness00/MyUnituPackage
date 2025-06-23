@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Util
+namespace Weariness.Util
 {
     [System.Serializable]
     public enum MinMaxValueType
