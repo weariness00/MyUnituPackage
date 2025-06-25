@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.fmod.occlusion",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "FMOD Occlusion",
   "description": "FMOD 에서 Occlusion 시뮬레이션을 구현",
   "unity": "2019.4",
