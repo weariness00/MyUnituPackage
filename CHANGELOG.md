@@ -1,7 +1,6 @@
-# [1.0.0]
+# [1.0.1]
 ## 2025-06-25
 ### 첫 릴리즈
 
-- FMOD 에서 Occlusion 시뮬레이션을 구현
-- 특정 위치에서 Occlusion된 사운드의 값을 반환
-- Sound Detecing을 하여 현재 위치에서 소리가 감지되었는지 판단 (실제로 들리지는 않는다.)
+- FMOD에 추가된 코드들은 Symbol로 관리한다.
+- 패키지 제거 전에 FMOD>Occlusion>Remove FMOD Occlusion Package를 실행하도록 추가

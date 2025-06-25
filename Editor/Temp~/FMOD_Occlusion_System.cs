@@ -1,3 +1,4 @@
+#if WEARINESS_FMOD_OCCLUSION
 using System;
 using System.Collections.Generic;
 using FMOD.Studio;
@@ -57,3 +58,4 @@ namespace Weariness.FMOD
         public HashSet<StudioEventEmitter> GetPlayingEmitters() => data.playEmiiterHashSet;
     }
 }
+#endif

@@ -119,7 +119,9 @@ namespace FMODUnity
 
         public void Awake()
         {
+#if WEARINESS_FMOD_OCCLUSION
             FMOD_Occlusion_System.Instance.AddEmitter(this);
+#endif
         }
 
         protected override void Start()
@@ -178,9 +180,10 @@ namespace FMODUnity
                     eventDescription.unloadSampleData();
                 }
             }
-            
+#if WEARINESS_FMOD_OCCLUSION
             if(FMOD_Occlusion_System.HasInstance)
                 FMOD_Occlusion_System.Instance.RemoveEmitter(this);
+#endif
         }
 
         protected override void HandleGameEvent(EmitterGameEvent gameEvent)
