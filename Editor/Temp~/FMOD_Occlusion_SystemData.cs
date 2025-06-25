@@ -8,17 +8,5 @@ namespace Weariness.FMOD
     {
         public HashSet<StudioEventEmitter> emitterHashSet = new HashSet<StudioEventEmitter>();
         public HashSet<StudioEventEmitter> playEmiiterHashSet = new HashSet<StudioEventEmitter>();
-
-        public void FixedUpdate()
-        {
-            foreach (var emitter in emitterHashSet)
-            {
-                emitter.EventInstance.getPlaybackState(out var state);
-                if (state == PLAYBACK_STATE.PLAYING || state == PLAYBACK_STATE.SUSTAINING)
-                {
-                    playEmiiterHashSet.Add(emitter);
-                }
-            }
-        }
     }
 }

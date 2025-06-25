@@ -1,0 +1,17 @@
+{
+    "name": "Weariness.FMOD.Occlusion",
+    "rootNamespace": "Weariness.FMOD",
+    "references": [
+        "FMODUnity",
+        "Weariness.Singleton.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -35,7 +35,7 @@ namespace Weariness.FMOD.Detecting
 
         public bool GetTryAnyDetecting(out Transform emitterTransform)
         {
-            var playingEmitters = FMOD_Occlusion_SoundDetectingSystem.Instance.GetPlayingEmitters();
+            var playingEmitters = FMOD_Occlusion_System.Instance.GetPlayingEmitters();
             foreach (var emitter in playingEmitters)
             {
                 // 3d 음향이 아니면 검사 안함
