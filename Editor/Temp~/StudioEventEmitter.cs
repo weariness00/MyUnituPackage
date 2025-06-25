@@ -178,6 +178,9 @@ namespace FMODUnity
                     eventDescription.unloadSampleData();
                 }
             }
+            
+            if(FMOD_Occlusion_System.HasInstance)
+                FMOD_Occlusion_System.Instance.RemoveEmitter(this);
         }
 
         protected override void HandleGameEvent(EmitterGameEvent gameEvent)
