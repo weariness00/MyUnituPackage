@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Weariness.FMOD.Detecting
 {
+    [AddComponentMenu("FMOD Studio/Occlusion/Sound Detecting Data")]
     public class FMOD_Occlusion_SoundDetectingData : MonoBehaviour
     {
         public float range = 10f; // 탐지 범위

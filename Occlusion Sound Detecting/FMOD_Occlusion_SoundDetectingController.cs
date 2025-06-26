@@ -3,14 +3,17 @@ using FMOD;
 using FMODUnity;
 using UnityEditor;
 using UnityEngine;
+using Weariness.FMOD.Occlusion;
 
 namespace Weariness.FMOD.Detecting
 {
     [RequireComponent(typeof(FMOD_Occlusion_SoundDetectingData))]
+    [AddComponentMenu("FMOD Studio/Occlusion/Sound Detecting Controller")]
     public class FMOD_Occlusion_SoundDetectingController : MonoBehaviour
     {
-        private FMOD_Occlusion_SoundDetectingData detectingData;
-
+        public FMOD_Occlusion_SoundDetectingMode detectingMode = FMOD_Occlusion_SoundDetectingMode.Ray; // 탐지 모드
+        [SerializeField] private FMOD_Occlusion_SoundDetectingData detectingData;
+        [SerializeField] private FMOD_OcclusionData occlusionData;
         private float min, max;
 
         private void Reset()
@@ -18,30 +21,22 @@ namespace Weariness.FMOD.Detecting
             if (detectingData == null)
                 detectingData = GetComponent<FMOD_Occlusion_SoundDetectingData>();
             
-            if (!Application.isPlaying)
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
         }
-
-        private void OnValidate()
+        
+        public bool TryAnyDetecting(out Transform emitterTransform)
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            
-            if (detectingData == null)
-                detectingData = GetComponent<FMOD_Occlusion_SoundDetectingData>();
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
+            if (detectingMode == FMOD_Occlusion_SoundDetectingMode.Ray) return TryAnyDetectingToRay(out emitterTransform);
 
-        public void FixedUpdate()
-        {
-            GetTryAnyDetecting(out var emitterTransform);
+            emitterTransform = null;
+            return false;
         }
-
-        public bool GetTryAnyDetecting(out Transform emitterTransform)
+        
+        private bool TryAnyDetectingToRay(out Transform emitterTransform)
         {
             var playingEmitters = FMOD_Occlusion_System.Instance.GetPlayingEmitters();
             var attributes3D = transform.To3DAttributes();
@@ -69,6 +64,9 @@ namespace Weariness.FMOD.Detecting
                 FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(StudioListener.ListenerCount - 1, attributes3D);
                 instance.setListenerMask(1 << 1);
                 instance.getVolume(out var volume);
+                
+                // 거리에 따라 감쇠된 소리에 오쿨루젼 계산을 포함
+                volume *= 1f - FMOD_OcclusionUtil.OccludeBetween(emitter.transform.position, transform.position, occlusionData);
                 
                 // 실제 감쇠된 소리가 감지가능한 소리크기보다 작은지 검사
                 if (volume < (1f - detectingData.threshold)) continue;

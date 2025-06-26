@@ -6,12 +6,16 @@
 # 패키지 제거시 필수 사항
 - 패키지 제거 전에 FMOD>Occlusion>Remove FMOD Occlusion Package를 실행해야 한다.
 
+# Occlusion Util
+- FMOD Occlusion Util은 FMOD Studio에서 Occlusion을 구현하기 위한 유틸리티입니다.
+
 # Listener Occlusion
 - https://www.youtube.com/watch?v=wTOHc803_ys&t=382s 를 참고하여 구현
 - 단순 Listener 변경일 경우 FMOD Studio Listener대신 FMOD_OcclusionListener를 사용합니다.
 
 # Occlusion Sound Detecting
-
+- 감지 범위 내에서 사운드가 발생하면 해당 사운드의 위치를 출력합니다.
+- 사운드 범위 + 감지 범위 만큼 탐지가 가능합니다.
 
 ``` utf8
 using System;
