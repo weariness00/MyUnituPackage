@@ -1,6 +1,7 @@
 #if WEARINESS_FMOD_OCCLUSION
 using System;
 using System.Collections.Generic;
+using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using Weariness.Util;   
@@ -10,10 +11,35 @@ namespace Weariness.FMOD
     public class FMOD_Occlusion_System : Singleton<FMOD_Occlusion_System>
     {
         [NonSerialized] private FMOD_Occlusion_SystemData data = new();
+        private int prevListenerCount = 0;
 
         public void Start()
         {
-            FMODUnity.RuntimeManager.StudioSystem.setNumListeners(2); // 예: N = 2, 3 등
+            prevListenerCount = StudioListener.ListenerCount + 1;
+            RuntimeManager.StudioSystem.setNumListeners(prevListenerCount); // 예: N = 2, 3 등
+        }
+
+        public void Update()
+        {
+            if (prevListenerCount != StudioListener.ListenerCount + 1)
+            {
+                prevListenerCount = StudioListener.ListenerCount + 1;
+                RuntimeManager.StudioSystem.setNumListeners(prevListenerCount); // 예: N = 2, 3 등
+            }
+
+            InitVirtualListenerDAttributes();
+        }
+        public void InitVirtualListenerDAttributes()
+        {
+            // 가상 리스너의 위치를 매우 먼 곳으로 보낸다.
+            var attributes3D = transform.To3DAttributes();
+            attributes3D.position = new VECTOR()
+            {
+                x = 9999999f,
+                y = 9999999f,
+                z = 9999999f
+            };
+            RuntimeManager.StudioSystem.setListenerAttributes(prevListenerCount, attributes3D);
         }
         
         public void FixedUpdate()
