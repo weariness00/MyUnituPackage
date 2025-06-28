@@ -1,11 +1,11 @@
 # Proprietary License (Non-Commercial, By-Permission Only)
 
-Copyright (c) 2025 [서동우]
+Copyright (c) 2025 서동우
 
 ## 1. Definitions
 - **“Software”** means all code, documentation, and resources included in the same directory as this LICENSE.md.
 - **“Licensee”** means the individual or entity granted rights under this License.
-- **“Licensor”** means the copyright holder ([Your Name or Nickname]).
+- **“Licensor”** means the copyright holder (서동우).
 
 ## 2. Grant of License
 The Licensor hereby grants the Licensee a **non-exclusive**, **non-transferable** license to **use** and **reproduce** the Software **solely for personal and non-commercial purposes**.
@@ -30,7 +30,7 @@ This License is automatically terminated if the Licensee breaches any of its ter
 ## 1. 정의
 - **“소프트웨어”**: 본 LICENSE.md 파일과 동일 디렉터리에 포함된 모든 코드, 문서, 리소스를 의미합니다.
 - **“라이선시”**: 본 라이선스를 통해 소프트웨어를 사용할 권리를 부여받은 자.
-- **“라이선서”**: 소프트웨어의 저작권자 또는 권리 보유자([Your Name]).
+- **“라이선서”**: 소프트웨어의 저작권자 또는 권리 보유자(서동우).
 
 ## 2. 라이선스 부여
 라이선서는 라이선시에게 **비독점적**, **양도 금지** 권리로서, **비영리적·개인적 용도**에 한해 소프트웨어를 복제·사용할 수 있는 권리를 부여합니다.
