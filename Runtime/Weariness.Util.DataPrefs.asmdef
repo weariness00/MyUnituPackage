@@ -1,10 +1,7 @@
 {
     "name": "Weariness.Util.DataPrefs",
     "rootNamespace": "Weariness.Util",
-    "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

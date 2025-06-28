@@ -10,48 +10,38 @@ namespace Weariness.Util
     {
         public static readonly string AddressableKey = "Weariness.Util/DataPrefs";
         private static string Name = "DataPrefs";
-        private static readonly string DefaultFilePath = "Packages/com.weariness.dataprefs/Setting/DataPrefs.json";
         private static Dictionary<string, string> prefs;
 
         static DataPrefs()
         {
             prefs = new Dictionary<string, string>();
+#if UNITY_EDITOR
+            if(Directory.Exists(Path.Combine(Application.dataPath, "Resources/DataPrefs")) == false)
+                AssetDatabase.CreateFolder("Assets/Resources", "DataPrefs");
+#endif
             LoadPrefs();
         }
         
-        private static void SavePrefs()
+        public static void SavePrefs()
         {
             string json = JsonUtility.ToJson(new Serialization<string, string>(prefs));
 
 #if UNITY_EDITOR
-            File.WriteAllText(
-                File.Exists(
-                    Path.Join(Application.dataPath, "Packages/com.weariness.dataprefs/Setting/DataPrefs.json")) ?
-                    DefaultFilePath :
-                    Path.Join(Application.dataPath, "Scripts/Setting/DataPrefs.json")
-                ,json);
-            AssetDatabase.ImportAsset(DefaultFilePath, ImportAssetOptions.ForceUpdate);
+            var path = Path.Join(Application.dataPath, "Resources/DataPrefs/DataPrefs.json");
+            File.WriteAllText(path,json);
             AssetDatabase.Refresh();
+            Debug.Log($"DataPrefs의 내용이 갱신되었습니다.\n경로 : {path}");
 #else
-            // 어드레서블로 불러와서 저장
-            
+            // 저장 기능 없음
+            Debug.Log("DataPrefs의 저장은 Editor에서만 가능합니다.");
 #endif
-            Debug.Log($"[Editor] {DefaultFilePath} 내용이 갱신되었습니다.");
         }
 
         public static void LoadPrefs()
         {
             string json = "";
-#if UNITY_EDITOR
-            var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(DefaultFilePath) ?? AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Scripts/Setting/DataPrefs.json");
-            if(textAsset != null)
-                json = textAsset.text;
-#else
-            var handle = Addressables.LoadAssetAsync<TextAsset>(AddressableKey);
-            handle.WaitForCompletion();
-            var textAsset = handle.Result;
-            json = textAsset.text;
-#endif
+            var textAsset = Resources.Load<TextAsset>("DataPrefs/DataPrefs.json");
+            if(textAsset != null) json = textAsset.text;
             if(json == "") return;
             prefs = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
         }
