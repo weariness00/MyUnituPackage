@@ -1,4 +1,4 @@
-﻿namespace Weariness.FMOD.Detecting
+﻿namespace Weariness.FMOD.Occlusion.Detecting
 {
     // 탐지 모드
     public enum FMOD_Occlusion_SoundDetectingMode

@@ -39,7 +39,7 @@ namespace Weariness.FMOD
                 y = 9999999f,
                 z = 9999999f
             };
-            RuntimeManager.StudioSystem.setListenerAttributes(prevListenerCount, attributes3D);
+            RuntimeManager.StudioSystem.setListenerAttributes(prevListenerCount - 1, attributes3D);
         }
         
         public void FixedUpdate()

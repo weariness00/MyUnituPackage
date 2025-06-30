@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Weariness.FMOD.Detecting
+namespace Weariness.FMOD.Occlusion.Detecting
 {
     [AddComponentMenu("FMOD Studio/Occlusion/Sound Detecting Data")]
     public class FMOD_Occlusion_SoundDetectingData : MonoBehaviour

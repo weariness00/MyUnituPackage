@@ -1,6 +1,6 @@
 {
-    "name": "Weariness.FMOD.Editor",
-    "rootNamespace": "Weariness.FMOD",
+    "name": "Weariness.FMOD.Occlusion.Editor",
+    "rootNamespace": "Weariness.FMOD.Occlusion",
     "references": [],
     "includePlatforms": [
         "Editor"

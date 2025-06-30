@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Weariness.FMOD
+namespace Weariness.FMOD.Occlusion
 {
     public class FMOD_Occlusion_Remover
     {

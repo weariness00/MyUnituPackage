@@ -1,26 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace Weariness.FMOD.Occlusion
 {
-    public partial class FMOD_OcclusionObstacle
-    {
-        private static Material SharedOcclusionMat;
-        private static bool isInit = false;
-
-        private static void Init()
-        {
-            if (SharedOcclusionMat == null)
-            {
-                // "OcclusionMaskUnlit"은 .mat 파일명 (확장자 제외)
-                SharedOcclusionMat = Resources.Load<Material>("OcclusionMaskUnlit");
-                if (SharedOcclusionMat == null)
-                    Debug.LogError("OcclusionMaskUnlit 머티리얼을 Resources 폴더에 넣으세요!");
-            }
-        }
-    }
-    
+    [AddComponentMenu("FMOD/Occlusion/Occlusion Obstacle")]
     public partial class FMOD_OcclusionObstacle : MonoBehaviour
     {
         private static int OcclusionID = Shader.PropertyToID("_Occlusion");
@@ -52,7 +37,14 @@ namespace Weariness.FMOD.Occlusion
 #endif
             renderer = GetComponent<Renderer>();
             Debug.Assert(renderer != null, "Renderer가 존재 하지 않아 OcclusionObstacle이 동작하지 않습니다.");
+
+            // FMOD_OcclusionSO에서 occlusionMaterialInstance를 가져와서 공유 재질로 설정
+            List<Material> sharedMaterials = new();
+            renderer.GetSharedMaterials(sharedMaterials);
+            sharedMaterials.Add(FMOD_OcclusionSO.Instance.occlusionMaterialInstance);
+            renderer.SetSharedMaterials(sharedMaterials);
             
+            // MaterialPropertyBlock을 사용하여 occlusionStrength 설정
             mpb = new MaterialPropertyBlock();
             renderer.GetPropertyBlock(mpb);
             mpb.SetFloat(OcclusionID, occlusionStrength);

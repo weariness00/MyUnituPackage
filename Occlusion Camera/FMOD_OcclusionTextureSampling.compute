@@ -1,0 +1,37 @@
+﻿/////////////////////////////////////////////////
+// R 단일 채널용 커널
+/////////////////////////////////////////////////
+Texture2D<float4> _SourceTex;         
+
+#pragma kernel CSMain_R
+
+RWStructuredBuffer<float2> _SumBufferR;
+uint _WidthR, _HeightR;
+
+[numthreads(16,16,1)]
+void CSMain_R(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _WidthR || id.y >= _HeightR) return;
+	float4 value = _SourceTex.Load(int3(id.x, id.y, 0));
+	float2 rg = float2(value.x, value.y);
+	uint flatIdx = id.y * _WidthR + id.x;
+	_SumBufferR[flatIdx] = rg;
+}
+
+/////////////////////////////////////////////////
+// RGBA 채널용 커널
+/////////////////////////////////////////////////
+#pragma kernel CSMain_RGBA
+
+RWStructuredBuffer<float2> _SumBufferRGBA;
+uint _WidthRGBA, _HeightRGBA;
+
+[numthreads(16,16,1)]
+void CSMain_RGBA(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _WidthRGBA || id.y >= _HeightRGBA) return;
+	float4 value = _SourceTex.Load(int3(id.x, id.y, 0));
+	float2 rg = float2(value.x, value.y);
+	uint flatIdx = id.y * _WidthRGBA + id.x;
+	_SumBufferRGBA[flatIdx] = rg;
+}

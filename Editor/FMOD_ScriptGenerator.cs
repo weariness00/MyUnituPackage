@@ -3,7 +3,7 @@ using SimpleJSON;
 using UnityEditor;
 using UnityEngine;
 
-namespace Weariness.FMOD
+namespace Weariness.FMOD.Occlusion
 {
     [InitializeOnLoad]
     public static class FMOD_ScriptGenerator
@@ -24,6 +24,11 @@ namespace Weariness.FMOD
 
             // C# 스크립트 기본 내용
             var path = Path.Combine(Application.dataPath, "Scripts/Editor/Temp~").Replace("\\", "/");
+            if (Directory.Exists(path) == false)
+            {
+                var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/com.weariness.fmod.occlusion");
+                path = Path.Combine(packageInfo.resolvedPath, "Editor/Temp~");
+            }
             var extension = "*.cs";
             string[] csFiles = Directory.GetFiles(path, extension, SearchOption.TopDirectoryOnly);
 

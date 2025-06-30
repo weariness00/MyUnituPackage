@@ -1,9 +1,12 @@
 {
     "name": "Weariness.FMOD.Occlusion",
-    "rootNamespace": "Weariness.FMOD",
+    "rootNamespace": "Weariness.FMOD.Occlusion",
     "references": [
         "FMODUnity",
-        "Weariness.Singleton.Runtime"
+        "Weariness.Singleton.Runtime",
+        "Weariness.Util.DataPrefs",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

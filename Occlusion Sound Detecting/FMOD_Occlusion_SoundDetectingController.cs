@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Weariness.FMOD.Occlusion;
 
-namespace Weariness.FMOD.Detecting
+namespace Weariness.FMOD.Occlusion.Detecting
 {
     [RequireComponent(typeof(FMOD_Occlusion_SoundDetectingData))]
     [AddComponentMenu("FMOD Studio/Occlusion/Sound Detecting Controller")]
