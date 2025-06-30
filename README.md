@@ -14,8 +14,10 @@
 - 단순 Listener 변경일 경우 FMOD Studio Listener대신 FMOD_OcclusionListener를 사용합니다.
 
 # Occlusion Sound Detecting
+- 가상 Listener를 사용하여 기본적으로는 매우 먼 위치에 두었지만 x,y,z 가 100000f임으로 이 값에 근접하면 사운드가 mix될 수 있다.
 - 감지 범위 내에서 사운드가 발생하면 해당 사운드의 위치를 출력합니다.
 - 사운드 범위 + 감지 범위 만큼 탐지가 가능합니다.
+- Ray기반 감지 가능
 
 ``` utf8
 using System;

@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.fmod.occlusion",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "FMOD Occlusion",
   "description": "FMOD 에서 Occlusion 시뮬레이션을 구현",
   "unity": "2019.4",
@@ -9,6 +9,7 @@
     "email": "ehddn917@gmail.com"
   },
   "dependencies": {
-    "com.weariness.singleton" : "1.0.0"
+    "com.weariness.singleton" : "1.0.0",
+    "com.weariness.dataprefs" : "1.1.4"
   }
 }

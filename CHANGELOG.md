@@ -1,6 +1,10 @@
-# [1.0.1]
-## 2025-06-25
-### 첫 릴리즈
+# [1.0.2]
+## 2025-06-30
 
-- FMOD에 추가된 코드들은 Symbol로 관리한다.
-- 패키지 제거 전에 FMOD>Occlusion>Remove FMOD Occlusion Package를 실행하도록 추가
+### FMOD Occlsuion Detection 
+
+- Ray 기반 Occlusion이 적용되어 Detecting 되도록 구현
+- 가상 Listeners를 사용하여 Occlusion이 적용된 소리 감지
+- 가상 Listeners는 사용하지 않으면 먼곳으로 위치 변경
+- FMOD Occlusion SO를 사용해서 공유 데이터 관리
+- DataPrefs를 의존 패키지로 추가
