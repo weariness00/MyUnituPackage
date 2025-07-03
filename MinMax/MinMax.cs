@@ -70,7 +70,7 @@
             {
                 Vector2 random = Vector2.zero;
                 random.x = UnityEngine.Random.Range(value.Min.x, value.Max.x);
-                random.y = UnityEngine.Random.Range(value.Min.x, value.Max.x);
+                random.y = UnityEngine.Random.Range(value.Min.y, value.Max.y);
                 return random;
             }
         }
@@ -83,6 +83,7 @@
                 Vector3Int length = Vector3Int.zero;
                 length.x = Mathf.Abs((int)value.Min.x) + Mathf.Abs((int)value.Max.x);
                 length.y = Mathf.Abs((int)value.Min.y) + Mathf.Abs((int)value.Max.y);
+                length.z = Mathf.Abs((int)value.Min.z) + Mathf.Abs((int)value.Max.z);
                 return length;
             }
 
@@ -90,7 +91,7 @@
             {
                 Vector3 random = Vector3.zero;
                 random.x = UnityEngine.Random.Range(value.Min.x, value.Max.x);
-                random.y = UnityEngine.Random.Range(value.Min.x, value.Max.x);
+                random.y = UnityEngine.Random.Range(value.Min.y, value.Max.y);
                 random.z = UnityEngine.Random.Range(value.Min.z, value.Max.z);
                 return random;
             }
