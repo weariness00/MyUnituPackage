@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.minmaxvalue",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "displayName": "Min Max Value Utility",
   "description": "최대 최소 현재 값을 표현해주는 유틸리티",
   "unity": "2019.4",
