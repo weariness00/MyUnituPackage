@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using FMOD;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using Debug = UnityEngine.Debug;
 
 namespace Weariness.FMOD.Occlusion
 {
@@ -46,12 +50,6 @@ namespace Weariness.FMOD.Occlusion
             occlusionCamera.fieldOfView = fov;
         }
     
-        public void SetCubMapDistance(float distance)
-        {
-            occlusionCamera.farClipPlane = distance;
-            occlusionCamera.nearClipPlane = 0.1f;
-        }
-
         public RenderTexture RenderOcclusionTexture()
         {
             FMOD_OcclusionSO.Instance.occlusionMaterialInstance.EnableKeyword("_Occlusion_Enable");
@@ -60,7 +58,7 @@ namespace Weariness.FMOD.Occlusion
             return OcclusionTexture;
         }
 
-        public float OcclusionValueSampling(RenderTexture texture)
+        public float OcclusionValueSampling(RenderTexture texture, float volume)
         {
             var textureSize = texture.width * texture.height;
             var buffer = new ComputeBuffer(textureSize, sizeof(float) * 2);
@@ -89,27 +87,28 @@ namespace Weariness.FMOD.Occlusion
             buffer.GetData(values);
             float sum = 0f;
             for (int i = 0; i < values.Length; ++i) {
-                if (values[i].y > 0f)
-                {
-                    if (values[i].x >= 1f)
-                        sum += values[i].x;
-                    else if (values[i].x >= 0f)
-                        sum += -values[i].y * 10f * (1f - values[i].x); // 음향 차단 강도
-                }
-                else
-                {
-                    sum += values[i].x;
-                }
+                sum += values[i].x; // R값만 사용
+                sum -= values[i].y; // G값을 빼서 차폐 강도 계산
             }
+            sum -= volume * values.Length;
             float avg = sum / values.Length;
 
             return avg < 0f ? 0f : avg; // 음향 차단 강도는 0 이상
         }
 
-        public float GetOcclusionValue()
+        public float GetOcclusionValue(StudioEventEmitter emitter)
         {
-            var texture = RenderOcclusionTexture();
-            float occlusionValue = OcclusionValueSampling(texture);
+            // 3D 음향이 아니면 검사 안함
+            emitter.EventDescription.is3D(out var is3D);
+            if(!is3D) return 0;
+
+            occlusionCamera.transform.LookAt(emitter.transform);
+            occlusionCamera.farClipPlane = Vector3.Distance(transform.position, emitter.transform.position);
+
+            emitter.EventInstance.getVolume(out var volume);
+
+            var renderTexture = RenderOcclusionTexture();
+            float occlusionValue = OcclusionValueSampling(renderTexture, volume);
             return occlusionValue;
         }
     }

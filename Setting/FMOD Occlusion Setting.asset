@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02ef643a11a3df741bf2df110337c617, type: 3}
   m_Name: FMOD Occlusion Setting
   m_EditorClassIdentifier: 
+  occlusionShader: {fileID: 4800000, guid: 236362da3ed282d418a386594bca5c7a, type: 3}
   occlusionMaterialInstance: {fileID: 2100000, guid: 2e99076a097f4494a8a62870a23aad3f, type: 2}
   occlusionTextureSampling: {fileID: 7200000, guid: fa395d0e856cca34182a6543c58120f5, type: 3}
+  volumeChannelMaterial: {fileID: 2100000, guid: 4368b168ffbdbc04ebdd9582af9babf9, type: 2}

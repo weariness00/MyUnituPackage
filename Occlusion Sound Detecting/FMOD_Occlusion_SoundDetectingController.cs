@@ -3,6 +3,7 @@ using FMOD;
 using FMODUnity;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Weariness.FMOD.Occlusion;
 
 namespace Weariness.FMOD.Occlusion.Detecting
@@ -13,7 +14,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
     {
         public FMOD_Occlusion_SoundDetectingMode detectingMode = FMOD_Occlusion_SoundDetectingMode.Ray; // 탐지 모드
         [SerializeField] private FMOD_Occlusion_SoundDetectingData detectingData;
-        [SerializeField] private FMOD_OcclusionData occlusionData;
+        [FormerlySerializedAs("rayOcclusionData")] [SerializeField] private FMOD_OcclusionRayData occlusionRayData;
         private float min, max;
 
         private void Reset()
@@ -82,7 +83,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
                 instance.setListenerMask(uint.MaxValue);
 
                 // 거리에 따라 감쇠된 소리에 오쿨루젼 계산을 포함
-                finalvolume *= 1f - FMOD_OcclusionUtil.OccludeBetween(emitter.transform.position, transform.position, occlusionData);
+                finalvolume *= 1f - occlusionRayData.OccludeBetween(emitter.transform.position, transform.position);
 
                 // 실제 감쇠된 소리가 감지가능한 소리크기보다 작은지 검사
                 if (finalvolume < (1f - detectingData.threshold)) continue;

@@ -2,10 +2,7 @@
 {
     Properties
     {
-        _ListenerPos("Listener Pos", Vector) = (0,0,0,0)
-        _SoundPos("Sound Pos", Vector) = (0,0,0,0)
         _Occlusion("Occlusion Strength", Range(0,1)) = 1
-        _Is_Sound("Is Sound", Float) = 0
     }
     SubShader
     {
@@ -24,27 +21,23 @@
             #include "UnityCG.cginc"
 
             float _Occlusion;
-            float _Is_Sound;
 
             struct appdata { float4 vertex : POSITION; };
-struct v2f {
-    float4 pos : SV_POSITION;
-    float3 worldPos : TEXCOORD1;
-};
+            struct v2f {float4 pos : SV_POSITION;};
 
             v2f vert(appdata v)
             {
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz; // 월드 공간 변환
+                // o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz; // 월드 공간 변환
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            fixed4 frag(v2f o) : SV_Target
             {
                 #ifdef _Occlusion_Enable
                 // 단순 R=방음력, G/B=0, A=1
-                return fixed4(_Occlusion, _Is_Sound, 0, 0);
+                return fixed4(_Occlusion, 0, 0, 1);
                 
                 #else
                 return fixed4(0,0,0,0);

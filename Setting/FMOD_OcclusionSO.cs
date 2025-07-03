@@ -10,5 +10,8 @@ namespace Weariness.FMOD.Occlusion
         public Shader occlusionShader;
         public Material occlusionMaterialInstance;
         public ComputeShader occlusionTextureSampling;
+        
+        [Space]
+        public Material volumeChannelMaterial;
     }
 }
