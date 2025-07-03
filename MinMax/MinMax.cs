@@ -46,5 +46,10 @@ namespace Weariness.Util
         {
             return (int)(Mathf.Abs(value.Min) + Mathf.Abs(value.Max));
         }
+
+        public static int Random(this MinMax<float> value)
+        {
+            return UnityEngine.Random.Range(value.Min, value.Max);
+        }
     }
 }
