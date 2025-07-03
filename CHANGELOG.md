@@ -1,6 +1,6 @@
-# [1.0.2]
-## 2025-06-24
-### 버그 수정
-
-- Editor 어셈블리 디파인 제대로 안된거 수정
-- NameSpace Weariness.Util로 통합
+# [1.0.3]
+## 2025-07-03
+### 추가 사항
+- Min Max 에서 Vector2, Vector3 지원
+### Bug Fix
+- Min Max 에서 float만 Random 지원 안하던 문제 수정
