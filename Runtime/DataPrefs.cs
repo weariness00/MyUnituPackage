@@ -41,7 +41,7 @@ namespace Weariness.Util
             string json = "";
 
             // 1. Resources에서 로드 시도
-            var textAsset = Resources.Load<TextAsset>("DataPrefs/DataPrefs.json");
+            var textAsset = Resources.Load<TextAsset>("DataPrefs/DataPrefs");
             if (textAsset != null)
                 json = textAsset.text;
 
