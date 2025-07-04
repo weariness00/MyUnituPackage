@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Weariness.Util.CSV.Editor
 {
-    static class CSVReaderExtension
+    public static class CSVReaderExtension
     {
         public static T DynamicCast<T>(this Dictionary<string, object> dictionary, string key) => DynamicCast<T>(dictionary, key, default(T));
         public static T DynamicCast<T>(this Dictionary<string,object> dictionary, string key, T defaultValue)
