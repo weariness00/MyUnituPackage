@@ -109,5 +109,18 @@ namespace Weariness.FMOD.Occlusion
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, string.Join(";", defineList));
             }
         }
+
+        public static void RemoveSymbol()
+        {
+            var targetGroup = BuildTargetGroup.Standalone;
+            var symbol = "WEARINESS_FMOD_OCCLUSION";
+            var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
+            var defineList = new System.Collections.Generic.List<string>(defines.Split(';'));
+            if (defineList.Contains(symbol))
+            {
+                defineList.Remove(symbol);
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, string.Join(";", defineList));
+            }
+        }
     }
 }

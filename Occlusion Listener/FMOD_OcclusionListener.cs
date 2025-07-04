@@ -36,6 +36,7 @@ namespace Weariness.FMOD.Occlusion
         private void RayOcclusion()
         {
             float min, max;
+#if WEARINESS_FMOD_OCCLUSION
             var playingEmitters = FMOD_Occlusion_System.Instance.GetPlayingEmitters();
             foreach (var emitter in playingEmitters)
             {
@@ -49,11 +50,13 @@ namespace Weariness.FMOD.Occlusion
                     FMOD_OcclusionUtil.SetOcclusionParameter(emitter.EventInstance, occlusionValue);
                 }
             }
+#endif
         }
 
         private void CameraOcclusion()
         {
             float min, max;
+#if WEARINESS_FMOD_OCCLUSION
             var playingEmitters = FMOD_Occlusion_System.Instance.GetPlayingEmitters();
             foreach (var emitter in playingEmitters)
             {
@@ -67,6 +70,7 @@ namespace Weariness.FMOD.Occlusion
                     FMOD_OcclusionUtil.SetOcclusionParameter(emitter.EventInstance, occlusionValue);
                 }
             }
+#endif
         }
     }
 }

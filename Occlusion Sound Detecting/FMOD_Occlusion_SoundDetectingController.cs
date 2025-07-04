@@ -53,6 +53,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
         private bool TryAnyDetectingToRay(out Transform emitterTransform)
         {
             emitterTransform = null;
+#if WEARINESS_FMOD_OCCLUSION
             var playingEmitters = FMOD_Occlusion_System.Instance.GetPlayingEmitters();
             var attributes3D = transform.To3DAttributes();
 
@@ -94,6 +95,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
             }
 
             VirtualListenerUpdate();
+#endif
             return false;
         }
     }

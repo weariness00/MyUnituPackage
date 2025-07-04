@@ -87,10 +87,8 @@ namespace Weariness.FMOD.Occlusion
             buffer.GetData(values);
             float sum = 0f;
             for (int i = 0; i < values.Length; ++i) {
-                sum += values[i].x; // R값만 사용
-                sum -= values[i].y; // G값을 빼서 차폐 강도 계산
+                sum += values[i].x * (1f - volume); // 차폐력 만큼 곱해주기
             }
-            sum -= volume * values.Length;
             float avg = sum / values.Length;
 
             return avg < 0f ? 0f : avg; // 음향 차단 강도는 0 이상
