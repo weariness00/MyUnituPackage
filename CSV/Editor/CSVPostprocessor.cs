@@ -6,12 +6,15 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-namespace Util.CSV.Editor
+namespace Weariness.Util.CSV.Editor
 {
     public class CSVPostprocessor : AssetPostprocessor
     {
         private static readonly Dictionary<string, ICSVProcessor> ProcessorsDictionary = new();
 
+        public static bool HasProcessor(ICSVProcessor processor) => processor != null && HasProcessor(processor.CSV_Name);
+        public static bool HasProcessor(string name) => ProcessorsDictionary.ContainsKey(name);
+        public static void AddProcessor(ICSVProcessor processor) => ProcessorsDictionary[processor.CSV_Name] = processor;
         public static void AddProcessor(string name, ICSVProcessor processor) => ProcessorsDictionary[name] = processor;
         public static void RemoveProcessor(string name)
         {
@@ -41,7 +44,7 @@ namespace Util.CSV.Editor
                 // 파일명/경로로 분기해서, 원하는 Processor 호출
                 foreach (var (key, value) in ProcessorsDictionary)
                 {
-                    if(path.Contains(key))
+                    if(Path.GetFileNameWithoutExtension(path) == key)
                         value.Process(ta, path);
                 }
             }

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
-namespace Util.CSV.Editor
+namespace Weariness.Util.CSV.Editor
 {
     static class CSVReaderExtension
     {
