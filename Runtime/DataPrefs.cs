@@ -39,10 +39,37 @@ namespace Weariness.Util
         public static void LoadPrefs()
         {
             string json = "";
+
+            // 1. Resources에서 로드 시도
             var textAsset = Resources.Load<TextAsset>("DataPrefs/DataPrefs.json");
-            if(textAsset != null) json = textAsset.text;
-            if(json == "") return;
-            prefs = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
+            if (textAsset != null)
+                json = textAsset.text;
+
+#if UNITY_EDITOR
+    // 2. Resources.Load 실패 시 파일 직접 읽기
+    if (string.IsNullOrEmpty(json))
+    {
+        string filePath = Path.Combine(Application.dataPath, "Resources/DataPrefs/DataPrefs.json");
+        if (File.Exists(filePath))
+        {
+            try
+            {
+                json = File.ReadAllText(filePath);
+                Debug.Log("[DataPrefs] Fallback 로딩 성공: 파일 직접 읽음");
+            }
+            catch (IOException e)
+            {
+                Debug.LogWarning($"[DataPrefs] 직접 로딩 실패: {e.Message}");
+            }
+        }
+    }
+#endif
+
+            // 3. 불러온 JSON으로 prefs 덮어쓰기
+            if (!string.IsNullOrEmpty(json))
+            {
+                prefs = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
+            }
         }
         
         public static bool HasKey(string key) => prefs.ContainsKey(key);
