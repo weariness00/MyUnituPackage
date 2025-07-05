@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Weariness.Util;
 
 namespace Weariness.FMOD.Occlusion
@@ -51,7 +51,6 @@ namespace Weariness.FMOD.Occlusion
     {
         public static FMOD_OcclusionSO setting;
 
-        private static readonly string JsonDirectory = "FMOD Occlusion";
         private static readonly string SettingKey = nameof(FMOD_OcclusionSO);
 
 #if UNITY_EDITOR
@@ -79,18 +78,25 @@ namespace Weariness.FMOD.Occlusion
             }
         }
 
-#else        
-        static SettingProviderHelper()
-        {
-            Load();
-        }
-
+#else
         public static void Load()
         {
             var path = DataPrefs.GetString(SettingKey, string.Empty);
             path = GetDataPath(path);
             setting = Resources.Load<FMOD_OcclusionSO>(path);
             Debug.Assert(setting != null, $"{path}해당 경로에 {SettingKey} 데이터가 존재하지 않습니다.");
+
+            if (setting == null)
+            {
+                Addressables.LoadAssetAsync<FMOD_OcclusionSO>(SettingKey).Completed += handle =>
+                {
+                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        setting = handle.Result;
+                    }
+                };
+            }
+            
         }
 #endif
         public static string GetDataPath(string path)
