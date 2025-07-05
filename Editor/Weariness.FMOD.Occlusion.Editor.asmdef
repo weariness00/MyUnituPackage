@@ -1,7 +1,12 @@
 {
     "name": "Weariness.FMOD.Occlusion.Editor",
     "rootNamespace": "Weariness.FMOD.Occlusion",
-    "references": [],
+    "references": [
+        "Weariness.FMOD.Occlusion",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "Unity.ResourceManager"
+    ],
     "includePlatforms": [
         "Editor"
     ],

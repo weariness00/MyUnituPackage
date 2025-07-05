@@ -16,7 +16,7 @@ namespace Weariness.FMOD.Occlusion
     [AddComponentMenu("FMOD Studio/Occlusion/Occlusion Camera")]
     public class FMOD_OcclusionCamera : MonoBehaviour
     {
-        public FMOD_OcclusionCameraData data;
+        public FMOD_OcclusionCameraData data = new();
 
         public void Reset()
         {
@@ -61,6 +61,8 @@ namespace Weariness.FMOD.Occlusion
     
         public RenderTexture RenderOcclusionTexture()
         {
+            if (FMOD_OcclusionSO.IsLoad == false) return data.occlusionTexture;
+            
             FMOD_OcclusionSO.Instance.occlusionMaterialInstance.EnableKeyword("_Occlusion_Enable");
             data.occlusionCamera.Render();
             FMOD_OcclusionSO.Instance.occlusionMaterialInstance.DisableKeyword("_Occlusion_Enable");
@@ -69,6 +71,8 @@ namespace Weariness.FMOD.Occlusion
 
         public float OcclusionValueSampling(RenderTexture texture)
         {
+            if (FMOD_OcclusionSO.IsLoad == false) return 0;
+            
             var textureSize = texture.width * texture.height;
             var buffer = new ComputeBuffer(textureSize, sizeof(float));
             ComputeShader cs = FMOD_OcclusionSO.Instance.occlusionTextureSampling;

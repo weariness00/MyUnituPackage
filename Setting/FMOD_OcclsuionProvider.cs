@@ -49,13 +49,15 @@ namespace Weariness.FMOD.Occlusion
 
     public static class SettingProviderHelper
     {
+        public static bool isLoad = false;
         public static FMOD_OcclusionSO setting;
 
-        private static readonly string SettingKey = nameof(FMOD_OcclusionSO);
+        public static readonly string SettingKey = nameof(FMOD_OcclusionSO);
 
 #if UNITY_EDITOR
         static SettingProviderHelper()
         {
+            isLoad = false;
             Load();
         }
 
@@ -75,6 +77,7 @@ namespace Weariness.FMOD.Occlusion
                 string settingPath = DataPrefs.GetString(SettingKey, string.Empty);
                 setting = AssetDatabase.LoadAssetAtPath<FMOD_OcclusionSO>(settingPath);
                 Debug.Assert(setting != null, $"{settingPath} 경로에 {SettingKey} 데이터가 존재하지 않습니다.");
+                isLoad = true;
             }
         }
 
@@ -93,6 +96,7 @@ namespace Weariness.FMOD.Occlusion
                     if (handle.Status == AsyncOperationStatus.Succeeded)
                     {
                         setting = handle.Result;
+                        isLoad = true;
                     }
                 };
             }
