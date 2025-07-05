@@ -13,7 +13,7 @@ namespace Weariness.FMOD.Occlusion
     {
         [SerializeField] private FMOD_OcclusionMode occlusionMode = FMOD_OcclusionMode.Ray;
         
-        public FMOD_OcclusionCameraData occlusionCameraData;
+        public FMOD_OcclusionCamera occlusionCamera;
         public FMOD_OcclusionRayData occlusionRayData;
 
         public void FixedUpdate()
@@ -66,7 +66,7 @@ namespace Weariness.FMOD.Occlusion
                 // 사운드가 들리는 범위 내라면
                 if (Vector3.Distance(transform.position, emitter.transform.position) <= max)
                 {
-                    var occlusionValue = occlusionCameraData.OcclusionCamera.GetOcclusionValue(emitter);
+                    var occlusionValue = occlusionCamera.GetOcclusionValue(emitter);
                     FMOD_OcclusionUtil.SetOcclusionParameter(emitter.EventInstance, occlusionValue);
                 }
             }

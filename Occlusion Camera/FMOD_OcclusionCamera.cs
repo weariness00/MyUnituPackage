@@ -16,52 +16,61 @@ namespace Weariness.FMOD.Occlusion
     [AddComponentMenu("FMOD Studio/Occlusion/Occlusion Camera")]
     public class FMOD_OcclusionCamera : MonoBehaviour
     {
-        [SerializeField] private Camera occlusionCamera;
+        public FMOD_OcclusionCameraData data;
 
-        public RenderTexture OcclusionTexture { get; private set; }
+        public void Reset()
+        {
+            data.occlusionCamera = GetComponent<Camera>();
+            if (data.occlusionCamera != null)
+            {
+                data.occlusionCamera.orthographic = true;
+                data.occlusionCamera.orthographicSize = 10;
+                data.occlusionCamera.fieldOfView = 150f;
+                data.occlusionCamera.farClipPlane = 1000f;
+                data.occlusionCamera.clearFlags = CameraClearFlags.SolidColor;
+                data.occlusionCamera.backgroundColor = Color.black; // 배경 = 완전 투명/무음
+            }
+        }
+
         public void Awake()
         {
             RenderTextureFormat targetFormat = RenderTextureFormat.ARGB32;
             if (!SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.R8))
                 targetFormat = RenderTextureFormat.ARGB32; // 혹은 필요시 RFloat 등
             // RenderTexture 생성 (예: 128x128 해상도)
-            OcclusionTexture = new RenderTexture(256, 256, 16, targetFormat)
+            data.occlusionTexture = new RenderTexture(256, 256, 16, targetFormat)
             {
                 useMipMap = false,
                 autoGenerateMips = false,
                 hideFlags = HideFlags.DontSave,
             };
-            OcclusionTexture.Create();
+            data.occlusionTexture.Create();
             
             // 카메라 
-            occlusionCamera.targetTexture = OcclusionTexture;
-            occlusionCamera.farClipPlane = 1000f;
-            occlusionCamera.clearFlags = CameraClearFlags.SolidColor;
-            occlusionCamera.backgroundColor = Color.black; // 배경 = 완전 투명/무음
-            occlusionCamera.enabled = false; // 수동 렌더링만 사용
-            occlusionCamera.fieldOfView = 90f;
+            data.occlusionCamera.targetTexture = data.occlusionTexture;
+            data.occlusionCamera.enabled = false; // 수동 렌더링만 사용
             
-            var camData = occlusionCamera.GetComponent<UniversalAdditionalCameraData>();
+            var camData = data.occlusionCamera.GetComponent<UniversalAdditionalCameraData>();
             camData.renderType = CameraRenderType.Base;
         }
 
         public void SetFieldOfView(float fov)
         {
-            occlusionCamera.fieldOfView = fov;
+            data.occlusionCamera.fieldOfView = fov;
         }
     
         public RenderTexture RenderOcclusionTexture()
         {
             FMOD_OcclusionSO.Instance.occlusionMaterialInstance.EnableKeyword("_Occlusion_Enable");
-            occlusionCamera.Render();
+            data.occlusionCamera.Render();
             FMOD_OcclusionSO.Instance.occlusionMaterialInstance.DisableKeyword("_Occlusion_Enable");
-            return OcclusionTexture;
+            return data.occlusionTexture;
         }
 
-        public float OcclusionValueSampling(RenderTexture texture, float volume)
+        public float OcclusionValueSampling(RenderTexture texture)
         {
             var textureSize = texture.width * texture.height;
-            var buffer = new ComputeBuffer(textureSize, sizeof(float) * 2);
+            var buffer = new ComputeBuffer(textureSize, sizeof(float));
             ComputeShader cs = FMOD_OcclusionSO.Instance.occlusionTextureSampling;
 
             if (texture.format == RenderTextureFormat.R8)
@@ -83,12 +92,11 @@ namespace Weariness.FMOD.Occlusion
                 cs.Dispatch(kernel, texture.width/16, texture.height/16, 1);
             }
 
-            var values = new Vector2[textureSize];
+            var values = new float[textureSize];
             buffer.GetData(values);
             float sum = 0f;
-            for (int i = 0; i < values.Length; ++i) {
-                sum += values[i].x * (1f - volume); // 차폐력 만큼 곱해주기
-            }
+            for (int i = 0; i < values.Length; ++i)
+                sum += values[i];
             float avg = sum / values.Length;
 
             return avg < 0f ? 0f : avg; // 음향 차단 강도는 0 이상
@@ -100,13 +108,11 @@ namespace Weariness.FMOD.Occlusion
             emitter.EventDescription.is3D(out var is3D);
             if(!is3D) return 0;
 
-            occlusionCamera.transform.LookAt(emitter.transform);
-            occlusionCamera.farClipPlane = Vector3.Distance(transform.position, emitter.transform.position);
-
-            emitter.EventInstance.getVolume(out var volume);
+            data.occlusionCamera.transform.LookAt(emitter.transform);
+            data.occlusionCamera.farClipPlane = Vector3.Distance(transform.position, emitter.transform.position);
 
             var renderTexture = RenderOcclusionTexture();
-            float occlusionValue = OcclusionValueSampling(renderTexture, volume);
+            float occlusionValue = OcclusionValueSampling(renderTexture);
             return occlusionValue;
         }
     }

@@ -12,7 +12,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
     [AddComponentMenu("FMOD Studio/Occlusion/Sound Detecting Controller")]
     public class FMOD_Occlusion_SoundDetectingController : MonoBehaviour
     {
-        public FMOD_Occlusion_SoundDetectingMode detectingMode = FMOD_Occlusion_SoundDetectingMode.Ray; // 탐지 모드
+        public FMOD_OcclusionMode mode = FMOD_OcclusionMode.Ray; // 탐지 모드
         [SerializeField] private FMOD_Occlusion_SoundDetectingData detectingData;
         [FormerlySerializedAs("rayOcclusionData")] [SerializeField] private FMOD_OcclusionRayData occlusionRayData;
         private float min, max;
@@ -44,7 +44,7 @@ namespace Weariness.FMOD.Occlusion.Detecting
         
         public bool TryAnyDetecting(out Transform emitterTransform)
         {
-            if (detectingMode == FMOD_Occlusion_SoundDetectingMode.Ray) return TryAnyDetectingToRay(out emitterTransform);
+            if (mode == FMOD_OcclusionMode.Ray) return TryAnyDetectingToRay(out emitterTransform);
 
             emitterTransform = null;
             return false;

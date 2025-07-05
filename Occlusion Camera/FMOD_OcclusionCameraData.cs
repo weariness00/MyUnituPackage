@@ -1,10 +1,12 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Weariness.FMOD.Occlusion
 {
     [Serializable]
     public class FMOD_OcclusionCameraData
     {
-        public FMOD_OcclusionCamera OcclusionCamera;
+        public Camera occlusionCamera;
+        public RenderTexture occlusionTexture;
     }
 }
