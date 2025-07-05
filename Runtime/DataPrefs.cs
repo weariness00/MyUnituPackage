@@ -15,6 +15,8 @@ namespace Weariness.Util
         {
             prefs = new Dictionary<string, string>();
 #if UNITY_EDITOR
+            if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+                AssetDatabase.CreateFolder("Assets", "Resources");
             if(Directory.Exists(Path.Combine(Application.dataPath, "Resources/DataPrefs")) == false)
                 AssetDatabase.CreateFolder("Assets/Resources", "DataPrefs");
 #endif
