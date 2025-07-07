@@ -82,18 +82,13 @@ namespace Weariness.FMOD.Occlusion.Detecting
                 FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(1, attributes3D);
 
                 // 오쿨루젼 적용
-                var prevOcclusion = FMOD_OcclusionUtil.GetOcclusionParameter(instance);
-                FMOD_OcclusionUtil.SetOcclusionParameter(instance, occlusionRayData.OccludeBetween(emitter.transform.position, transform.position));
-
                 instance.setListenerMask((uint)(1 << StudioListener.ListenerCount)); // 리스트너 갯수 + 1 번째가 가상 리스너
                 instance.getVolume(out var volume, out var finalvolume);
                 instance.setListenerMask(uint.MaxValue);
 
-                // 사운드 구한 후 원상복귀
-                FMOD_OcclusionUtil.SetOcclusionParameter(instance, prevOcclusion);
-
                 // 거리에 따라 감쇠된 소리에 오쿨루젼 계산을 포함
-                //finalvolume *= 1f - occlusionRayData.OccludeBetween(emitter.transform.position, transform.position);
+                // Occlusion을 적용해도 Fmod는 비동기적으로 동작하기 때문에 Volume 업데이트가 바로 안되어서 수동 감쇠 해야된다.
+                finalvolume *= 1f - occlusionRayData.OccludeBetween(emitter.transform.position, transform.position);
 
                 // 실제 감쇠된 소리가 감지가능한 소리크기보다 작은지 검사
                 if (finalvolume < (1f - data.threshold)) continue;
@@ -139,16 +134,13 @@ namespace Weariness.FMOD.Occlusion.Detecting
                 };
                 FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(1, attributes3D);
 
-                // 오쿨루젼 적용                
-                var prevOcclusion = FMOD_OcclusionUtil.GetOcclusionParameter(instance);
-                FMOD_OcclusionUtil.SetOcclusionParameter(instance, occlusionCamera.GetOcclusionValue(emitter));
-
                 instance.setListenerMask((uint)(1 << StudioListener.ListenerCount)); // 리스트너 갯수 + 1 번째가 가상 리스너
                 instance.getVolume(out var volume, out var finalvolume);
                 instance.setListenerMask(uint.MaxValue);
 
-                // 사운드 구한 후 원상복귀
-                FMOD_OcclusionUtil.SetOcclusionParameter(instance, prevOcclusion);
+                // 거리에 따라 감쇠된 소리에 오쿨루젼 계산을 포함
+                // Occlusion을 적용해도 Fmod는 비동기적으로 동작하기 때문에 Volume 업데이트가 바로 안되어서 수동 감쇠 해야된다.
+                finalvolume *= 1f - occlusionCamera.GetOcclusionValue(emitter);
 
                 // 실제 감쇠된 소리가 감지가능한 소리크기보다 작은지 검사
                 if (finalvolume < (1f - data.threshold)) continue;

@@ -19,6 +19,10 @@
 - 사운드 범위 + 감지 범위 만큼 탐지가 가능합니다.
 - Ray기반 감지 가능
 
+### Camera 기반 감지
+- Occlusion의 파라미터를 적용해도 FMOD의 내부 사운드 업데이트는 비동기이기 떄문에 바로 적용되지 않는다. 따라서 1f - OcclusionValue 값을 Volume에 곱해주어 소리의 감쇠를 판단한다.
+- 선형적인 감쇠 감지 
+
 ``` utf8
 using System;
 using UnityEngine;
