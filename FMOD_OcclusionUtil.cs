@@ -21,5 +21,15 @@ namespace Weariness.FMOD.Occlusion
                 instance.setVolume(value);
             }
         }
+
+        public static float GetOcclusionParameter(EventInstance instance)
+        {
+            if (instance.getParameterByName("Occlusion", out var param) == RESULT.OK)
+            {
+                return (float) param;
+            }
+
+            return 0f;
+        }
     }
 }
