@@ -1,6 +1,4 @@
-# [1.1.0]
-## 2025-07-07
-
-### FMOD Occlsuion Detection 
-
-- Detecting에 Camera로 감지 추가
+# [1.1.1]
+## 2025-07-10
+### Bug Fix
+- 빌드 에러를 일으키는 스크립트 수정
