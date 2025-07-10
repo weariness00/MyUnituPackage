@@ -1,0 +1,14 @@
+﻿#pragma kernel CSMain
+
+uint _Width, _Height;
+RWStructuredBuffer<float4> _OutputTextureBuffer;
+Texture2D<float4> _SourceTex; 
+
+[numthreads(16,16,1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Width || id.y >= _Height) return;
+    float4 value = _SourceTex.Load(int3(id.x, id.y, 0));
+    uint flatIdx = id.y * _Width + id.x;
+    _OutputTextureBuffer[flatIdx] = value;
+}
