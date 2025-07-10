@@ -6,7 +6,9 @@
         "Unity.RenderPipelines.Universal.Runtime",
         "Weariness.Noesis"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

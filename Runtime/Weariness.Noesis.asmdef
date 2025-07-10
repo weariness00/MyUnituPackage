@@ -3,6 +3,7 @@
     "rootNamespace": "Weariness.Noesis",
     "references": [
         "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.ResourceManager",
         "Unity.Addressables",
         "Weariness.Util.DataPrefs",
         "Weariness.Util.MinMaxValue"
