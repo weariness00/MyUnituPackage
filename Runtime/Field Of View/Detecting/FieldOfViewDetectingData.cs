@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Weariness.Util;
 
 namespace Weariness.Noesis.FieldOfView
 {

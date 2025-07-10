@@ -1,0 +1,19 @@
+{
+    "name": "Weariness.Noesis",
+    "rootNamespace": "Weariness.Noesis",
+    "references": [
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.Addressables",
+        "Weariness.Util.DataPrefs",
+        "Weariness.Util.MinMaxValue"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

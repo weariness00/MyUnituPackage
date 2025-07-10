@@ -1,0 +1,18 @@
+{
+    "name": "Weariness.Noesis.Editor",
+    "rootNamespace": "Weariness.Noesis",
+    "references": [
+        "Unity.Addressables.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Weariness.Noesis"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
