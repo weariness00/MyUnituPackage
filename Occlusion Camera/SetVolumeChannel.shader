@@ -12,6 +12,7 @@
 			CGPROGRAM
 			#pragma vertex vert_img
 			#pragma fragment frag
+			#include "UnityCG.cginc" // ✅ 꼭 포함해야 함
 
 			sampler2D _MainTex;
 			float _Volume;

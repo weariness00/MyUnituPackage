@@ -1,13 +1,15 @@
-﻿using UnityEditor;
+﻿using System.Net;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Weariness.Util;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 namespace Weariness.FMOD.Occlusion
 {
 #if UNITY_EDITOR
-    
+
     public static class Provider
     {
         [SettingsProvider]
@@ -16,7 +18,7 @@ namespace Weariness.FMOD.Occlusion
             var provider = new SettingsProvider(
                 "Project/FMOD/Occlusion",
                 SettingsScope.Project,
-                new []{"FMOD", "Occlusion"})
+                new[] { "FMOD", "Occlusion" })
             {
                 guiHandler = searchContext =>
                 {
@@ -32,7 +34,7 @@ namespace Weariness.FMOD.Occlusion
                     {
                         UnityEditor.Editor.CreateEditor(setting).OnInspectorGUI();
                     }
-                    
+
                     // setting이 변경되었을 경우 Save() 호출
                     if (GUI.changed)
                     {
@@ -44,7 +46,7 @@ namespace Weariness.FMOD.Occlusion
             return provider;
         }
     }
-    
+
 #endif
 
     public static class SettingProviderHelper
@@ -54,12 +56,12 @@ namespace Weariness.FMOD.Occlusion
 
         public static readonly string SettingKey = nameof(FMOD_OcclusionSO);
 
-#if UNITY_EDITOR
         static SettingProviderHelper()
         {
             isLoad = false;
             Load();
         }
+#if UNITY_EDITOR
 
         public static void Save()
         {
@@ -97,10 +99,25 @@ namespace Weariness.FMOD.Occlusion
                     {
                         setting = handle.Result;
                         isLoad = true;
+                        Debug.Log($"{SettingKey}를 성공적으로 로딩");
                     }
+                    else
+                    {
+                        Debug.LogError("❌ Load failed for address: " + SettingKey);
+
+                        if (handle.OperationException != null)
+                            Debug.LogError("Reason: " + handle.OperationException.Message);
+                        else
+                            Debug.LogError("Unknown error.");
+                    }
+
                 };
             }
-            
+            else
+            {
+                isLoad = true;
+                Debug.Log($"{SettingKey}를 성공적으로 로딩");
+            }
         }
 #endif
         public static string GetDataPath(string path)

@@ -21,12 +21,6 @@ namespace Weariness.FMOD.Occlusion.Detecting
         {
             if (data == null)
                 data = GetComponent<FMOD_Occlusion_SoundDetectingData>();
-
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-            }
         }
 
         private void VirtualListenerUpdate()

@@ -22,6 +22,7 @@ namespace Weariness.FMOD.Occlusion
 
         public void OnValidate()
         {
+#if UNITY_EDITOR
             if (EditorApplication.isPlaying)
             {
                 if (Math.Abs(occlusionStrength - prevOcclusionStrength) > 0.001f)
@@ -29,6 +30,7 @@ namespace Weariness.FMOD.Occlusion
                     SetOcclusion(occlusionStrength);
                 }
             }
+#endif
         }
 
         void Awake()
@@ -62,7 +64,7 @@ namespace Weariness.FMOD.Occlusion
         // 값이 바뀔 때마다 갱신하고 싶으면 함수로 따로 빼서 호출
         public void SetOcclusion(float value)
         {
-#if true
+#if UNITY_EDITOR
             prevOcclusionStrength = value;    
 #endif
             
