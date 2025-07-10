@@ -1,0 +1,16 @@
+{
+  "name": "com.weariness.Noesis",
+  "version": "0.0.1",
+  "displayName": "Noesis Architecture",
+  "description": "인지, 지각, 판단 등에 대한 것을 구현 주로 AI와 Find, Detecting 등을 구현",
+  "unity": "2019.4",
+  "author": {
+    "name": "Weariness",
+    "email": "ehddn917@gmail.com"
+  },
+  "dependencies": {
+    "com.weariness.singleton": "1.0.0",
+    "com.weariness.dataprefs": "1.1.50",
+    "com.unity.addressables": "2.4.6"
+  }
+}
