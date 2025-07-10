@@ -54,12 +54,12 @@ namespace Weariness.Noesis.FieldOfView
 
         public static readonly string SettingKey = nameof(FieldOfViewSO);
 
-#if UNITY_EDITOR
         static SettingProviderHelper()
         {
             isLoad = false;
             Load();
         }
+#if UNITY_EDITOR
 
         public static void Save()
         {
