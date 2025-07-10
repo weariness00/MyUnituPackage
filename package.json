@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.noesis",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "displayName": "Noesis Architecture",
   "description": "인지, 지각, 판단 등에 대한 것을 구현 주로 AI와 Find, Detecting 등을 구현",
   "unity": "2019.4",
