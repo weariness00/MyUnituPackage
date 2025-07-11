@@ -341,4 +341,230 @@ namespace Weariness.Util.Editor
             return EditorGUIUtility.singleLineHeight;
         }
     }
+
+    [CustomPropertyDrawer(typeof(MinMax<Vector2Int>))]
+    public class MinMaxVector2IntPropertyDrawer : PropertyDrawer
+    {
+        float commaWidth = 8f;
+        float charWidth = 9f;
+        float minTotalWidth = 0;
+        float maxTotalWidth = 0;
+
+        private float maxWidthLength = 150f;
+
+        int size = 2;
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+
+            var minProp = property.FindPropertyRelative("_min");
+            var maxProp = property.FindPropertyRelative("_max");
+
+            var min = minProp.vector2IntValue;
+            var max = maxProp.vector2IntValue;
+
+            position = EditorGUI.PrefixLabel(position, label);
+
+
+            // min/max 칸 크기 계산
+            float[] minWidths = new float[3];
+            float[] maxWidths = new float[3];
+
+            minTotalWidth = 16;
+            maxTotalWidth = 16;
+            for (int i = 0; i < size; ++i)
+            {
+                minWidths[i] = Mathf.Clamp(min[i].GetDigitCount() * charWidth + 5f, 25f, 100f);
+                maxWidths[i] = Mathf.Clamp(max[i].GetDigitCount() * charWidth + 5f, 25f, 100f);
+                if (i != 0)
+                {
+                    minTotalWidth += commaWidth;
+                    maxTotalWidth += commaWidth;
+                }
+
+                minTotalWidth += minWidths[i];
+                maxTotalWidth += maxWidths[i];
+            }
+
+            float xMin = position.x;
+            float xMax = position.x;
+            float yMin = position.y;
+            float yMax = position.y;
+
+            float lineHeight = EditorGUIUtility.singleLineHeight;
+
+            // 한 줄에 다 못들어가면 2줄로 분리
+            bool splitLine = minTotalWidth > maxWidthLength || maxTotalWidth > maxWidthLength;
+
+            // min 필드
+            for (int i = 0; i < size; ++i)
+            {
+                min[i] = EditorGUI.IntField(new Rect(xMin, yMin, minWidths[i], lineHeight), min[i]);
+                xMin += minWidths[i];
+                if (i != size - 1)
+                {
+                    xMin += commaWidth;
+                }
+            }
+
+            // ~
+            EditorGUI.LabelField(new Rect(xMin, yMin, 18, lineHeight), " ~ ");
+
+            if (splitLine)
+            {
+                // max를 다음 줄에
+                yMax += lineHeight + EditorGUIUtility.standardVerticalSpacing;
+                xMax = position.x;
+            }
+            else
+            {
+                // max는 같은 줄에
+                xMax = xMin + 22;
+            }
+
+
+            // max 필드
+            for (int i = 0; i < size; ++i)
+            {
+                max[i] = EditorGUI.IntField(new Rect(xMax, yMax, maxWidths[i], lineHeight), max[i]);
+                xMax += maxWidths[i];
+                if (i != size - 1)
+                {
+                    xMax += commaWidth;
+                }
+            }
+
+            minProp.vector2IntValue = min;
+            maxProp.vector2IntValue = max;
+
+            EditorGUI.EndProperty();
+            property.serializedObject.ApplyModifiedProperties();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (minTotalWidth > maxWidthLength || maxTotalWidth > maxWidthLength)
+            {
+                // 두 줄
+                return EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
+            }
+
+            // 한 줄
+            return EditorGUIUtility.singleLineHeight;
+        }
+    }
+
+    [CustomPropertyDrawer(typeof(MinMax<Vector3Int>))]
+    public class MinMaxVector3IntPropertyDrawer : PropertyDrawer
+    {
+        float commaWidth = 8f;
+        float charWidth = 9f;
+        float minTotalWidth = 0;
+        float maxTotalWidth = 0;
+
+        private float maxWidthLength = 150f;
+
+        int size = 3;
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+
+            var minProp = property.FindPropertyRelative("_min");
+            var maxProp = property.FindPropertyRelative("_max");
+
+            var min = minProp.vector3IntValue;
+            var max = maxProp.vector3IntValue;
+
+            position = EditorGUI.PrefixLabel(position, label);
+
+
+            // min/max 칸 크기 계산
+            float[] minWidths = new float[3];
+            float[] maxWidths = new float[3];
+
+            minTotalWidth = 16;
+            maxTotalWidth = 16;
+            for (int i = 0; i < size; ++i)
+            {
+                minWidths[i] = Mathf.Clamp(min[i].GetDigitCount() * charWidth + 5f, 25f, 100f);
+                maxWidths[i] = Mathf.Clamp(max[i].GetDigitCount() * charWidth + 5f, 25f, 100f);
+                if (i != 0)
+                {
+                    minTotalWidth += commaWidth;
+                    maxTotalWidth += commaWidth;
+                }
+
+                minTotalWidth += minWidths[i];
+                maxTotalWidth += maxWidths[i];
+            }
+
+            float xMin = position.x;
+            float xMax = position.x;
+            float yMin = position.y;
+            float yMax = position.y;
+
+            float lineHeight = EditorGUIUtility.singleLineHeight;
+
+            // 한 줄에 다 못들어가면 2줄로 분리
+            bool splitLine = minTotalWidth > maxWidthLength || maxTotalWidth > maxWidthLength;
+
+            // min 필드
+            for (int i = 0; i < size; ++i)
+            {
+                min[i] = EditorGUI.IntField(new Rect(xMin, yMin, minWidths[i], lineHeight), min[i]);
+                xMin += minWidths[i];
+                if (i != size - 1)
+                {
+                    xMin += commaWidth;
+                }
+            }
+
+            // ~
+            EditorGUI.LabelField(new Rect(xMin, yMin, 18, lineHeight), " ~ ");
+
+            if (splitLine)
+            {
+                // max를 다음 줄에
+                yMax += lineHeight + EditorGUIUtility.standardVerticalSpacing;
+                xMax = position.x;
+            }
+            else
+            {
+                // max는 같은 줄에
+                xMax = xMin + 22;
+            }
+
+
+            // max 필드
+            for (int i = 0; i < size; ++i)
+            {
+                max[i] = EditorGUI.IntField(new Rect(xMax, yMax, maxWidths[i], lineHeight), max[i]);
+                xMax += maxWidths[i];
+                if (i != size - 1)
+                {
+                    xMax += commaWidth;
+                }
+            }
+
+            minProp.vector3IntValue = min;
+            maxProp.vector3IntValue = max;
+
+            EditorGUI.EndProperty();
+            property.serializedObject.ApplyModifiedProperties();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (minTotalWidth > maxWidthLength || maxTotalWidth > maxWidthLength)
+            {
+                // 두 줄
+                return EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
+            }
+
+            // 한 줄
+            return EditorGUIUtility.singleLineHeight;
+        }
+    }
 }

@@ -1,3 +1,9 @@
+# Min Max
+- Inspector에 표시되는 자료형 : int, float, Vector2, Vector3, Vector2Int, Vector3Int
+
+# Min Max Value
+- Inspector에 표시되는 자료형 : int, float
+
 # Example
 ``` utf8
 
