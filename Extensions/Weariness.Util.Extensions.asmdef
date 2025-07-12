@@ -4,8 +4,7 @@
     "references": [
         "Unity.Collections",
         "Unity.Burst",
-        "Unity.TextMeshPro.Tests",
-        ""
+        "Unity.TextMeshPro.Tests"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
