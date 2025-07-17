@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.extensions",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "displayName": "Extensions Utility",
   "description": "확장 메서드 관련 유틸리티",
   "unity": "2019.4",
