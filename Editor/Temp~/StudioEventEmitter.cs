@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+#if WEARINESS_FMOD_OCCLUSION
 using Weariness.FMOD;
-
+#endif
 namespace FMODUnity
 {
     [AddComponentMenu("FMOD Studio/FMOD Studio Event Emitter")]

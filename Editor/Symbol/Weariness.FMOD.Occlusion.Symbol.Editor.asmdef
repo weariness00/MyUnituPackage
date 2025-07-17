@@ -1,12 +1,8 @@
 {
-    "name": "Weariness.FMOD.Occlusion.Editor",
+    "name": "Weariness.FMOD.Occlusion.Symbol.Editor",
     "rootNamespace": "Weariness.FMOD.Occlusion",
     "references": [
-        "Weariness.FMOD.Occlusion",
-        "Unity.Addressables",
-        "Unity.Addressables.Editor",
-        "Unity.ResourceManager",
-        "Weariness.FMOD.Occlusion.Symbol.Editor"
+        "Weariness.Util.DataPrefs"
     ],
     "includePlatforms": [
         "Editor"
@@ -16,9 +12,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "WEARINESS_FMOD_OCCLUSION"
-    ],
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

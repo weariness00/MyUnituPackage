@@ -14,7 +14,6 @@ namespace Weariness.FMOD.Occlusion
         {
             CreateScriptFile();
             UpdateFMOD_Assemble();
-            AddSymbol();
         }
          
         private static void CreateScriptFile()
@@ -95,32 +94,6 @@ namespace Weariness.FMOD.Occlusion
             // 4. 저장
             File.WriteAllText(assemblePath, root.ToString(2)); // 들여쓰기 2칸
             AssetDatabase.Refresh();
-        }
-
-        private static void AddSymbol()
-        {
-            var targetGroup = BuildTargetGroup.Standalone;
-            var symbol = "WEARINESS_FMOD_OCCLUSION";
-            var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
-            var defineList = new System.Collections.Generic.List<string>(defines.Split(';'));
-            if (!defineList.Contains(symbol))
-            {
-                defineList.Add(symbol);
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, string.Join(";", defineList));
-            }
-        }
-
-        public static void RemoveSymbol()
-        {
-            var targetGroup = BuildTargetGroup.Standalone;
-            var symbol = "WEARINESS_FMOD_OCCLUSION";
-            var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
-            var defineList = new System.Collections.Generic.List<string>(defines.Split(';'));
-            if (defineList.Contains(symbol))
-            {
-                defineList.Remove(symbol);
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, string.Join(";", defineList));
-            }
         }
     }
 }

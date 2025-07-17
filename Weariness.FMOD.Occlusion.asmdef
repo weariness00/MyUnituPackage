@@ -16,7 +16,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "WEARINESS_FMOD_OCCLUSION"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

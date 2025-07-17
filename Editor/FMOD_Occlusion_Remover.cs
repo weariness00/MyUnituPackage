@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using Weariness.FMOD.Occlusion.Editor;
 
 namespace Weariness.FMOD.Occlusion
 {
@@ -8,12 +9,6 @@ namespace Weariness.FMOD.Occlusion
         public static void InitOcclusionSystemData()
         {
             FMOD_ScriptGenerator.Init();
-        }
-        
-        [MenuItem("FMOD/Occlusion/Remove Occlusion System Data")]
-        public static void RemoveOcclusionSystemData()
-        {
-            FMOD_ScriptGenerator.RemoveSymbol();
         }
     }
 }
