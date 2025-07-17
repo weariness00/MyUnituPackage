@@ -91,3 +91,39 @@ public partial class CustomUnique : IUniqueMaker<CustomUnique>
 }
 
 ```
+---
+# Stat, StatModifier
+- Status를 사용할때 계산 공식을 구조화한 클래스
+- Stat은 기본적으로 StatModifier를 가지고 있으며, StatModifier는 Stat에 영향을 주는 수정자이다.
+- Stat의 값은 float으로 관리된다.
+- StatModifier은 Flat(float 형 실수), Percent(float 형 실수), 
+  Flat은 Value 에 +로 추가되는 수치이다.  
+  StatModifier는 Stat에 영향을 주는 수정자이다.
+
+### 사용 예시
+```utf8
+using System;
+using UnityEngine;
+using Weariness.Util;
+
+public class StatTest : MonoBehaviour
+{
+    public Stat health;
+    public Stat damage;
+    public StatModifier flatModifier = new StatModifier(20, StatModifierType.Flat);
+    public StatModifier percentModifier = new StatModifier(0.5f, StatModifierType.Percent);
+
+    private void Awake()
+    {
+        health = new Stat(100);
+        damage = new Stat(10);
+
+        // Flat 수정자 추가
+        health.AddModifier(flatModifier);
+        // Percent 수정자 추가
+        damage.AddModifier(percentModifier);
+
+        Debug.Log($"Health: {health.Value}, Damage: {damage.Value}");
+    }
+}
+``` 
