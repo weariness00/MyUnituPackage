@@ -3,7 +3,8 @@
     Properties
     {
         _Occlusion("Occlusion Strength", Range(0,1)) = 1
-        _Target_Position("Target Position", Vector) = (0,0,0,0)
+        _Sound_Position("Sound Position", Vector) = (0,0,0,0)
+        _Sound_Distance("Sound Distance", float) = 0
     }
     SubShader
     {
@@ -22,7 +23,8 @@
             #include "UnityCG.cginc"
 
             float _Occlusion;
-            float4 _Target_Position;
+            float4 _Sound_Position;
+            float _Sound_Distance;
 
             struct appdata { float4 vertex : POSITION; };
             struct v2f {float4 pos : SV_POSITION;};
@@ -39,9 +41,9 @@
             {
                 #ifdef _Occlusion_Enable
                 float4 worldPos = mul(unity_CameraToWorld, o.pos);
-                float distance = distance(worldPos.xyz, _Target_Position.xyz);
+                float distance = distance(worldPos.xyz, _Sound_Position.xyz);
                 // 단순 R=방음력, G=Sound와 정점의 거리, B=0, A=1
-                return fixed4(_Occlusion, distance, 0, 1);
+                return fixed4(_Occlusion, distance / (_Sound_Distance * 0.5f), 0, 1);
                 
                 #else
                 return fixed4(0,0,0,0);

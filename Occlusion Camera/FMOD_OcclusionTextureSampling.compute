@@ -1,10 +1,8 @@
-﻿Texture2D<float4> _SourceTex;         
+﻿#pragma kernel CSMain_RGBA
+#pragma kernel CSMain_Distance_Sampling
 
+Texture2D _SourceTex;         
 RWStructuredBuffer<float4> _SumBufferRGBA;
-/////////////////////////////////////////////////
-// RGBA 채널용 커널
-/////////////////////////////////////////////////
-#pragma kernel CSMain_RGBA
 uint _WidthRGBA, _HeightRGBA;
 
 [numthreads(16,16,1)]
@@ -12,12 +10,9 @@ void CSMain_RGBA(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _WidthRGBA || id.y >= _HeightRGBA) return;
 	float4 value = _SourceTex.Load(int3(id.x, id.y, 0));
-	float occlusionValue = value.x;
 	uint flatIdx = id.y * _WidthRGBA + id.x;
-	_SumBufferRGBA[flatIdx] = occlusionValue;
+	_SumBufferRGBA[flatIdx] = value;
 }
-
-#pragma kernel CSMain_Distance_Sampling
 
 [numthreads(16,16,1)]
 void CSMain_Distance_Sampling(uint3 id : SV_DispatchThreadID)
@@ -25,15 +20,14 @@ void CSMain_Distance_Sampling(uint3 id : SV_DispatchThreadID)
 	if (id.x >= _WidthRGBA || id.y >= _HeightRGBA) return;
 	float4 value = _SourceTex.Load(int3(id.x, id.y, 0));
 	if(value.y > 0) return;
-	bool left = id.x - 1 > 0;
-	bool up = id.x -1 > 0;
+	bool left = id.x > 1;
+	bool up = id.y > 1;
 	bool leftUp = left && up;
-	float distance = 10000f;
-	if(left) distance = min(distance, _SourceTex.Load(int3(id.x - 1, id.y, 0)).y);
-	if(up) distance = min(distance, _SourceTex.Load(int3(id.x, id.y - 1, 0)).y);
-	if(leftUp) distance = min(distance, _SourceTex.Load(int3(id.x - 1, id.y - 1, 0)).y);
+	float distanceL = left ? _SourceTex.Load(int3(id.x - 1, id.y, 0)).y : 10000.0;
+	float distanceU = up ? _SourceTex.Load(int3(id.x, id.y - 1, 0)).y : 10000.0;
+	float distanceLU = leftUp ? _SourceTex.Load(int3(id.x - 1, id.y - 1, 0)).y : 10000.0;
+	const float distance = min(distanceL, min(distanceU,distanceLU));
 	value.y = distance;
-	
 	uint flatIdx = id.y * _WidthRGBA + id.x;
 	_SumBufferRGBA[flatIdx] = value;
 }
