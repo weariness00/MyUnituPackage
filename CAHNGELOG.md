@@ -1,7 +1,4 @@
-# [1.1.0]
-## 2025-07-17
-### 첫 릴리즈
-
-- Mesh의 정점들을 그래프 삼아 정점 A에서 정점 B 까지의 거리 반환
-- Unique 자료구조 구현 (int, Vector2Int, Vector3Int 만 기본 지원)
-- Stat, StatModifier 구현 : Status를 사용할때 계산 공식을 구조화한 클래스
+# [1.1.1]
+## 2025-07-23
+### String Extension 추가
+- Text에 사용되는 태그 2개(Color, Sprite Name)를 확장메서드로 제작 

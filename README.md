@@ -127,3 +127,33 @@ public class StatTest : MonoBehaviour
     }
 }
 ``` 
+---
+# String Extension
+## Text 태그 확장
+- Text에 사용되는 태그(Color, Sprite Name)를 확장메서드로 제작
+### 사용 예시
+```utf8
+using UnityEngine;
+using UnityEngine.UI;
+using Weariness.Util;
+using TMPro;
+
+public class TextExtensionTest : MonoBehaviour
+{
+    public TMP_Text t;
+
+    private void Start()
+    {
+        // Color 태그 사용 예시
+        t.text = "This is a <color=red>red</color> text.";
+        
+        // Sprite Name 태그 사용 예시
+        t.text += " This is a <sprite name=\"MySprite\"/> sprite.";
+        
+        // 확장 메서드 사용
+        t.text = "blue Color".ApplyColorTag("blue", Color.blue);
+        t.text = "My Sprite : " + "".ApplySpriteNameTag("MySprite");
+    }
+}
+```
+---
