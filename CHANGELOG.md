@@ -1,9 +1,6 @@
-# [1.1.0]
-## 2025-07-20
+# [1.2.0]
+## 2025-07-24
+## 신규 버전
 ### 추가 사항
-- Field 또는 Property로 CSV에 파싱하여 데이터를 반환하는 기능 추가
-- Editor에서만 사용하는 것이 아닌 Runtime에서도 CSV를 읽을 수 있도록 기능 추가
-- LICENSE 파일 추가
-
-### 수정 사항
-- package.json의 .meta 파일 삭제
+- Excel의 특정 시트를 읽어서 .csv로 Export해주는 ConvertCSV 구현
+- 프로젝트내에 .xlsx 파일의 변화를 감지해서 특정 함수를 실행할 수 있는 ExcelPostProcessor 구현 (Editor에서만 사용 가능)

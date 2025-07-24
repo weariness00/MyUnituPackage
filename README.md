@@ -1,39 +1,83 @@
 # Example
 
-## CSVPostprocessor 사용법
+## Post processor 사용법
 - CustomProcessor를 사용하기 위해서는 CSV파일 Name을 CSVPostprocessor.AddProcessor(key, processor)로 등록할때 key와 같아야합니다.
 ```utf-8
-    [InitializeOnLoad]
-    public static class CustomProcessorInitializer
+[InitializeOnLoad]
+public static class CustomProcessorInitializer
+{
+    static CustomProcessorInitializer()
     {
-        static CustomProcessorInitializer()
-        {
-            // 도메인 리로드 직후 딜레이 콜에 등록
-            EditorApplication.delayCall += OnEditorLoaded;
-        }
+        // 도메인 리로드 직후 딜레이 콜에 등록
+        EditorApplication.delayCall += OnEditorLoaded;
+    }
 
-        private static void OnEditorLoaded()
+    private static void OnEditorLoaded()
+    {
+        // 여기에 한 번만 실행할 코드
+        var csv = new CSVProcessorTest();
+        if (!CSVPostprocessor.HasProcessor(csv))
+            CSVPostprocessor.AddProcessor(csv);
+
+        var excel = new ExcelProcessorTest();
+        if (!ExcelPostProcessor.HasProcessor(excel))
         {
-            // 여기에 한 번만 실행할 코드
-            var csv = new CSVTest();
-            if(!CSVPostprocessor.HasProcessor(csv))
-                CSVPostprocessor.AddProcessor(csv);
+            excel.sheetNames.Add("A");
+            excel.sheetNames.Add("B");
+            ExcelPostProcessor.AddProcessor(excel);
         }
     }
+}
 ```
 
 - 읽고 싶은 CSV 마다 ICSVProcessor를 상속하여 제작
 ```utf-8
+public class CSVProcessorTest : ICSVProcessor
+{
+    public string CSV_Name { get; set; } = "CSV";
 
-    public class CSVTest : ICSVProcessor
+    public void Process(TextAsset textAsset, string path)
     {
-        public string CSV_Name { get; set; } = "CSV";
-
-        public void Process(TextAsset textAsset, string path)
-        {
-            // 여기에 로직 추가
-        }
     }
+}
+```
+
+- 읽고 싶은 Excel 마다 IExcelProcessor를 상속하여 제작
+```utf-8
+public class ExcelProcessorTest : IExcelProcessor
+{
+    public string Name { get; set; } = "Excel";
+    public List<string> sheetNames { get; set; } = new List<string>();
+
+    public void Process(ExcelPackage package)
+    {
+        // ExcelPackage 처리 로직
+        Debug.Log("Processing Excel Package");
+    }
+
+    public void Process(string sheetText, string sheetName)
+    {
+        // CSV로 변환된 시트 처리 로직
+        if (sheetName == "A")
+            ASheet(sheetText);
+        else if (sheetName == "B")
+            BSheet(sheetText);
+        else
+            Debug.LogWarning($"Unknown sheet: {sheetName}");
+    }
+
+    private void ASheet(string sheet)
+    {
+        // A 시트 처리 로직
+        Debug.Log($"Processing A Sheet: {sheet}");
+    }
+
+    private void BSheet(string sheet)
+    {
+        // B 시트 처리 로직
+        Debug.Log($"Processing B Sheet: {sheet}");
+    }
+}
 ```
 ---
 ## Properties 또는 Fields로 파싱
