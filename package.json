@@ -1,8 +1,8 @@
 {
-  "name": "com.weariness.csv",
+  "name": "com.weariness.branchName",
   "version": "1.1.0",
-  "displayName": "CSV Utility",
-  "description": "CSV 파싱 for Unity",
+  "displayName": "간단 이름",
+  "description": "설명",
   "unity": "2019.4",
   "author": {
     "name": "Weariness",
