@@ -1,0 +1,50 @@
+# .github/workflows/release-extensions.yml
+name: Release BranchName Package
+
+permissions:
+  contents: write 
+
+# on:
+#   push:
+#     branches:
+#       - BranchName
+#   workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # 1) 전체 히스토리와 태그를 가져와야 git tag & push 가능
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # 2) Node.js 세팅 (package.json 읽기용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+
+      # 3) package.json 버전 읽기
+      - name: Read version
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # 4) 태그 생성 및 푸시
+      - name: Create & Push Git Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.Unity_UPM_GITHUB_TOKEN }}
+        run: |
+          TAG=BranchName-v${{ steps.get_version.outputs.version }}
+          echo "🔖 Creating tag $TAG"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      # 5) 완료 메시지
+      - name: Done
+        run: echo "✅ Released BranchName version ${{ steps.get_version.outputs.version }}"
