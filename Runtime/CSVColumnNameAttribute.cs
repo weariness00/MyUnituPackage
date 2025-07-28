@@ -3,10 +3,10 @@
 namespace Weariness.Util.CSV
 {
     [System.AttributeUsage(System.AttributeTargets.Field)]
-    public class CSVFieldNameAttribute : Attribute
+    public class CSVColumnNameAttribute : Attribute
     {
         public string Name { get; }
-        public CSVFieldNameAttribute(string name)
+        public CSVColumnNameAttribute(string name)
         {
             Name = name;
         }

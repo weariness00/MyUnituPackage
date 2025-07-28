@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using UnityEngine;
 
 namespace Weariness.Util.CSV
@@ -124,53 +125,12 @@ namespace Weariness.Util.CSV
                 throw;
             }
         }
-
-        public static void ReadToProperty<T>(this TextAsset csvFile, out T[] data) where T : new()
-        {
-            try
-            {
-                Debug.Assert(csvFile != null, "CSV파일이 없어서 데이터를 셋팅하지 못했습니다.");
-                CSVReader.ReadToProperty(csvFile.text, out data);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw;
-            }
-        }
         
-        public static void ReadToProperty<T>(this string text, out T[] data) where T : new()
+        public static TData[] Read<TData>(this string text, Func<TData, TData> onUpdateData = null) where TData : new()
         {
             try
             {
-                CSVReader.ReadToProperty(text, out data);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw;
-            }
-        }
-        
-        public static void ReadToFiled<T>(this TextAsset csvFile, out T[] data) where T : new()
-        {
-            try
-            {
-                Debug.Assert(csvFile != null, "CSV파일이 없어서 데이터를 셋팅하지 못했습니다.");
-                CSVReader.ReadToFiled(csvFile.text, out data);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw;
-            }
-        }
-        
-        public static void ReadToFiled<T>(this string text, out T[] data) where T : new()
-        {
-            try
-            {
-                CSVReader.ReadToFiled(text, out data);
+                return CSVReader.Read<TData>(text, onUpdateData);
             }
             catch (Exception e)
             {
@@ -180,7 +140,7 @@ namespace Weariness.Util.CSV
         }
     }
 
-    public static class CSVReader
+    public static partial class CSVReader
     {
         static string SPLIT_RE = @",(?=(?:[^""]*""[^""]*"")*(?![^""]*""))";
         static string LINE_SPLIT_RE = @"(?:\r\n|\n\r|\r)(?=(?:[^""]*""[^""]*"")*[^""]*$)";
@@ -193,16 +153,14 @@ namespace Weariness.Util.CSV
             if (lines.Length <= 1) return;
 
             // 나중에 값이 안들어 있는 경우에 빈 값을 넣어주도록 바꾸어야한다.
-            FindHeader(text, "header", out var headerData);
-            var header = headerData.Item1;
-            var headerIndex = headerData.Item2;
+            var (headers, headerIndex) = FindHeader(text, "header");
             for (var i = headerIndex; i < lines.Length - 1; i++)
             {
                 var lineValues = Regex.Split(lines[i], SPLIT_RE);
                 if (lineValues.Length == 0 || lineValues[0] == "//" || lineValues[0].ToLower() == "header") continue;
 
                 var entry = new Dictionary<string, object>();
-                for (var j = 0; j < header.Length && j < lineValues.Length; j++)
+                for (var j = 0; j < headers.Length && j < lineValues.Length; j++)
                 {
                     string value = lineValues[j];
                     if (value.StartsWith(TRIM_CHARS[0]) && value.EndsWith(TRIM_CHARS[0]))
@@ -245,7 +203,7 @@ namespace Weariness.Util.CSV
                             objectValue = n;
                         }
 
-                        entry[header[j]] = objectValue;
+                        entry[headers[j]] = objectValue;
                     }
                     else
                     {
@@ -262,7 +220,7 @@ namespace Weariness.Util.CSV
                             finalvalue = f;
                         }
 
-                        entry[header[j]] = finalvalue;
+                        entry[headers[j]] = finalvalue;
                     }
                 }
 
@@ -270,117 +228,91 @@ namespace Weariness.Util.CSV
             }
         }
 
-        public static void ReadToFiled<T>(string text, out T[] data) where T : new()
+        public static TData[] Read<TData>(string text, Func<TData, TData> onUpdateData) where TData : new()
         {
-            data = Array.Empty<T>();
             var lines = Regex.Split(text, LINE_SPLIT_RE);
-            if (lines.Length <= 1) return;
+            if (lines.Length <= 1) return Array.Empty<TData>();
 
-            var list = new List<T>();
-            // 변수 필드로 읽기
-            var fields = typeof(T).GetFields();
-            var fieldDict = fields.ToDictionary(p => GetFieldByCSVName(p).ToLower(), p => p);
+            // 초기화
+            bool isUpdate = onUpdateData != null;
+            
+            // '//'이 없는 첫 행이 헤더
+            var (headers, headerIndex) = FindHeader(text, "");
 
-            // 나중에 값이 안들어 있는 경우에 빈 값을 넣어주도록 바꾸어야한다.
-            FindHeader(text, "header", out var headerData);
-            var header = headerData.Item1;
-            var headerIndex = headerData.Item2;
-            for (var i = headerIndex; i < lines.Length - 1; i++)
+            // TData의 Field, Property의 데이터를 매핑
+            var typeSetters = ReflectionCache.TypeSetters<TData>();
+            List<TData> dataList = new();
+            for (var i = headerIndex + 1; i < lines.Length - 1; i++)
             {
                 var lineValues = Regex.Split(lines[i], SPLIT_RE);
-                if (lineValues.Length == 0 || lineValues[0] == "//" || lineValues[0].ToLower() == "header") continue;
-
-                var entry = new T();
-                for (var j = 0; j < header.Length && j < lineValues.Length; j++)
+                if (lineValues.Length == 0 || lineValues[0] == "//") continue;
+                
+                var data = new TData();
+                for (var j = 0; j < headers.Length && j < lineValues.Length; j++)
                 {
-                    if (fieldDict.TryGetValue(header[j].ToLower(), out var field) == false) continue;
-                    string value = lineValues[j];
-                    var objectValue = GetObjectValue(value, field.FieldType);
-                    field.SetValue(entry, objectValue);
+                    if (typeSetters.TryGetValue(headers[j], out var typeSetter))
+                    {
+                        string value = lineValues[j];
+                        var objectValue = GetObjectValue(value, typeSetter.Type);
+                        if (typeSetter.IsRef)
+                            typeSetter.RefSetter(ref data, objectValue);
+                        else
+                            typeSetter.NonRefSetter(data, objectValue);
+                    }
                 }
-
-                list.Add(entry);
+                if (isUpdate)
+                    data = onUpdateData.Invoke(data);
+                dataList.Add(data);
             }
 
-            data = list.ToArray();
+            return dataList.ToArray();
         }
 
-        public static void ReadToProperty<T>(string text, out T[] data) where T : new()
-        {
-            data = Array.Empty<T>();
-            var lines = Regex.Split(text, LINE_SPLIT_RE);
-            if (lines.Length <= 1) return;
-
-            var list = new List<T>();
-            // 프로퍼티로 읽기
-            var properties = typeof(T).GetProperties();
-            var propertyDict = properties.ToDictionary(p => GetPropertyByCSVName(p).ToLower(), p => p);
-
-            // 나중에 값이 안들어 있는 경우에 빈 값을 넣어주도록 바꾸어야한다.
-            FindHeader(text, "header", out var headerData);
-            var header = headerData.Item1;
-            var headerIndex = headerData.Item2;
-            for (var i = headerIndex; i < lines.Length - 1; i++)
-            {
-                var lineValues = Regex.Split(lines[i], SPLIT_RE);
-                if (lineValues.Length == 0 || lineValues[0] == "//" || lineValues[0].ToLower() == "header") continue;
-
-                var entry = new T();
-                for (var j = 0; j < header.Length && j < lineValues.Length; j++)
-                {
-                    if (propertyDict.TryGetValue(header[j].ToLower(), out var property) == false) continue;
-                    string value = lineValues[j];
-                    var objectValue = GetObjectValue(value, property.PropertyType);
-                    property.SetValue(entry, objectValue);
-                }
-                list.Add(entry);
-            }
-
-            data = list.ToArray();
-        }
-
-        private static void FindHeader(string text, string headerName, out Tuple<string[], int> header)
+        private static (string[] haeders, int headerIndex) FindHeader(string text, string headerName)
         {
             var lines = Regex.Split(text, LINE_SPLIT_RE);
             for (var i = 0; i < lines.Length; i++)
             {
                 var values = Regex.Split(lines[i], SPLIT_RE);
                 if (values.Length == 0 || values[0] == "//") continue;
-                if (values[0].ToLower() == headerName)
+                if (values[0].ToLower() == headerName || string.IsNullOrEmpty(headerName))
                 {
-                    header = new(Regex.Split(lines[i], SPLIT_RE), i);
-                    return;
+                    return new(Regex.Split(lines[i], SPLIT_RE), i);
                 }
             }
 
-            header = new(Array.Empty<string>(), -1);
+            return new(Array.Empty<string>(), -1);
         }
         
-        private static string GetFieldByCSVName(FieldInfo fieldInfo)
+        public static string GetFieldByCSVName(FieldInfo fieldInfo)
         {
-            var attr = fieldInfo.GetCustomAttribute<CSVFieldNameAttribute>();
+            var attr = fieldInfo.GetCustomAttribute<CSVColumnNameAttribute>();
             if (attr != null) return attr.Name;
             return fieldInfo.Name;
         }
         
-        private static string GetPropertyByCSVName(PropertyInfo propertyInfo)
+        public static string GetPropertyByCSVName(PropertyInfo propertyInfo)
         {
-            var attr = propertyInfo.GetCustomAttribute<CSVFieldNameAttribute>();
+            var attr = propertyInfo.GetCustomAttribute<CSVColumnNameAttribute>();
             if (attr != null) return attr.Name;
             return propertyInfo.Name;
         } 
 
 
-        private static object GetObjectValue(string value, Type type)
+        public static object GetObjectValue(string value, Type type)
         {
             object objectValue = value;
             if (type.IsArray)
             {
                 value = value.TrimStart(TRIM_CHARS).TrimEnd(TRIM_CHARS).Replace("\\", "");
                 var values = Regex.Split(value, SPLIT_RE);
+                type = type.GetElementType();
                 objectValue = values;
+                object defaultValue = Array.Empty<string>();
+                if(type != typeof(string))
+                    defaultValue = Array.CreateInstance(type, 0);
 
-                if (type.GetElementType() == typeof(bool))
+                if (type == typeof(bool))
                 {
                     var boolList = new List<bool>();
                     foreach (string v in values)
@@ -395,25 +327,43 @@ namespace Weariness.Util.CSV
 
                     objectValue = boolList.ToArray();
                 }
-                else if (type.GetElementType() == typeof(int))
+                else if (type == typeof(int))
                 {
                     int[] n = new int[values.Length];
                     for (var index = 0; index < values.Length; index++)
                         int.TryParse(values[index], out n[index]);
                     objectValue = n;
                 }
-                else if (type.GetElementType() == typeof(float))
+                else if (type == typeof(float))
                 {
                     float[] f = new float[values.Length];
                     for (var index = 0; index < values.Length; index++)
                         float.TryParse(values[index], out f[index]);
                     objectValue = f;
                 }
+                else if (type!.IsEnum)
+                {
+                    Array array = Array.CreateInstance(type, values.Length);
+                    for (var index = 0; index < values.Length; index++)
+                    {
+                        if(int.TryParse(values[index], out var i))
+                            array.SetValue(Enum.ToObject(type, i), index);
+                        else if (Enum.IsDefined(type, values[index]))
+                            array.SetValue(Enum.Parse(type, values[index]), index);
+                        else
+                            array.SetValue(defaultValue, index);
+                    }
+
+                    objectValue = array;
+                }
             }
             else
             {
                 value = value.TrimStart(TRIM_CHARS).TrimEnd(TRIM_CHARS).Replace("\\", "");
-
+                object defaultValue = "";
+                if(type != typeof(string))
+                    defaultValue = Activator.CreateInstance(type);
+                
                 // bool일 경우
                 if (type == typeof(bool))
                 {
@@ -438,8 +388,23 @@ namespace Weariness.Util.CSV
                     else
                         objectValue = default(float);
                 }
+                else if (type.IsEnum)
+                {
+                    if (int.TryParse(value, out var i))
+                        objectValue = Enum.ToObject(type, i);
+                    else if (Enum.IsDefined(type, value))
+                        objectValue = Enum.Parse(type, value);
+                    else
+                        objectValue = defaultValue;
+                }
             }
 
+            var objectType = objectValue.GetType();
+            if (objectType.IsArray)
+                objectType = objectType.GetElementType();
+
+            if (objectType != type)
+                return Activator.CreateInstance(type);
             return objectValue;
         }
     }

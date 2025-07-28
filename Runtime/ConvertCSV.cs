@@ -62,14 +62,49 @@ namespace Weariness.Util.CSV
             return sb.ToString();
         }
 
-        private static string EscapeCsv(string input)
+        public static string EscapeCsv(string input)
         {
-            if (input.Contains(",") || input.Contains("\"") || input.Contains("\n"))
+            if (string.IsNullOrEmpty(input))
+                return "";
+
+            bool requiresEscape = false;
+
+            // 1. 빠른 경로: 아무 특수문자 없음
+            for (int i = 0; i < input.Length; i++)
             {
-                return "\"" + input.Replace("\"", "\"\"") + "\"";
+                char c = input[i];
+                if (c == ',' || c == '"' || c == '\n' || c == '\r')
+                {
+                    requiresEscape = true;
+                    break;
+                }
             }
 
-            return input;
+            if (!requiresEscape)
+                return input;
+
+            // 2. Escape 필요: StringBuilder 재사용
+            var sb = new StringBuilder(input.Length + 10); // 넉넉하게 잡기
+            sb.Append('"');
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+                if (c == '"')
+                    sb.Append("\"\""); // 이중 따옴표
+                else
+                    sb.Append(c);
+            }
+
+            sb.Append('"');
+            return sb.ToString();
+            
+            // if (input.Contains(",") || input.Contains("\"") || input.Contains("\n"))
+            // {
+            //     return "\"" + input.Replace("\"", "\"\"") + "\"";
+            // }
+            //
+            // return input;
         }
 
         // 일단 무조건 utf-8형태로 저장

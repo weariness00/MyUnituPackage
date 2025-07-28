@@ -1,5 +1,15 @@
-# Example
+# Convert CSV
+- excel의 한 시트를 csv형태의 문자열로 export해준다.
+```utf-8
+string sheetName = "A Sheet"
+string path = "Assets/A.xlsx"
+var excel = new ExcelPackage(new FileInfo(Path.Combine(Application.dataPath, path)));
 
+string csv = ConvertCSV.ExportSheetToCsv(excel, sheetName); 
+```
+---
+
+# CSV Reader
 ## Post processor 사용법
 - CustomProcessor를 사용하기 위해서는 CSV파일 Name을 CSVPostprocessor.AddProcessor(key, processor)로 등록할때 key와 같아야합니다.
 ```utf-8
@@ -79,7 +89,6 @@ public class ExcelProcessorTest : IExcelProcessor
     }
 }
 ```
----
 ## Properties 또는 Fields로 파싱
 - Field 또는 Property의 이름과 CSV의 Header 이름이 같아야합니다.
 - 만일 Field 또는 Property의 이름이 CSV의 Header와 다를 경우, `CSVFieldName` 어트리뷰트를 사용하여 매핑할 수 있습니다.
@@ -129,6 +138,48 @@ namespace Test.CSV
         [CSVFieldName("bool_array")] public bool[] boolArray;
     }
 }
-
-
 ```
+
+---
+# CSV Reader - Excel
+- EPPlus 를 사용해 Excel을 CSV 형태로 읽어 사용한다.
+```utf-8
+using System;
+using System.IO;
+using OfficeOpenXml;
+using UnityEngine;
+using Weariness.Util.CSV;
+
+namespace Weariness.Util.Extensions.Test.CSV
+{
+    
+    public class CSV_Excel_Test : MonoBehaviour
+    {
+        public string excelPath = "Test/CSV/Test.xlsx";
+        public TestData[] datas;
+        
+        public void Awake()
+        {
+            var excel = new ExcelPackage(new FileInfo(Path.Combine(Application.dataPath, excelPath)));
+            var worksheet = excel?.Workbook?.Worksheets["A"];
+            datas = CSVReader.ReadToExcelSheet<TestData>(worksheet);
+        }
+    }
+
+    public enum A
+    {
+        A = 0,
+        B = 1,
+    }
+
+    [Serializable]
+    public struct TestData
+    {
+        public int av;
+        public A[] type;
+        public string id;
+    }
+}
+```
+
+## CSV Reader
