@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Weariness.Util.CSV
 {
-    public static class CSVReaderExtension
+    public static partial class CSVReaderExtension
     {
         public static T DynamicCast<T>(this Dictionary<string, object> dictionary, string key) => DynamicCast<T>(dictionary, key, default(T));
 
@@ -126,11 +126,11 @@ namespace Weariness.Util.CSV
             }
         }
         
-        public static TData[] Read<TData>(this string text, Func<TData, TData> onUpdateData = null) where TData : new()
+        public static void Read<TData>(this string text, out TData[] datas,  Func<TData, TData> onUpdateData = null) where TData : new()
         {
             try
             {
-                return CSVReader.Read<TData>(text, onUpdateData);
+                CSVReader.Read<TData>(text, out datas, onUpdateData);
             }
             catch (Exception e)
             {
@@ -228,10 +228,14 @@ namespace Weariness.Util.CSV
             }
         }
 
-        public static TData[] Read<TData>(string text, Func<TData, TData> onUpdateData) where TData : new()
+        public static void Read<TData>(string text, out TData[] datas, Func<TData, TData> onUpdateData) where TData : new()
         {
             var lines = Regex.Split(text, LINE_SPLIT_RE);
-            if (lines.Length <= 1) return Array.Empty<TData>();
+            if (lines.Length <= 1)
+            {
+                datas = Array.Empty<TData>();
+                return;
+            }
 
             // 초기화
             bool isUpdate = onUpdateData != null;
@@ -241,7 +245,7 @@ namespace Weariness.Util.CSV
 
             // TData의 Field, Property의 데이터를 매핑
             var typeSetters = ReflectionCache.TypeSetters<TData>();
-            List<TData> dataList = new();
+            List<TData> dataList = new(lines.Length - headerIndex);
             for (var i = headerIndex + 1; i < lines.Length - 1; i++)
             {
                 var lineValues = Regex.Split(lines[i], SPLIT_RE);
@@ -265,7 +269,7 @@ namespace Weariness.Util.CSV
                 dataList.Add(data);
             }
 
-            return dataList.ToArray();
+            datas = dataList.ToArray();
         }
 
         private static (string[] haeders, int headerIndex) FindHeader(string text, string headerName)

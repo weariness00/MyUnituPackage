@@ -8,6 +8,5 @@ namespace Weariness.Util.CSV.Editor
         public string Name { get; set; }
         public List<string> sheetNames { get; set; }
         public void Process(ExcelPackage package);
-        public void Process(string sheetText, string sheetName);
     }
 }

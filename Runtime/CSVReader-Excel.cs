@@ -1,12 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using OfficeOpenXml;
+using UnityEngine;
 
 namespace Weariness.Util.CSV
 {
+    public static partial class CSVReaderExtension
+    {
+        public static void Read<TData>(this ExcelWorksheet worksheet, out TData[] datas, Func<TData, TData> onUpdateData = null) where TData : new()
+        {
+            try
+            {
+                CSVReader.ReadToExcelSheet<TData>(worksheet, out datas, onUpdateData);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                throw;
+            }
+        }
+    }
+    
     public static partial class CSVReader
     {
-        public static TData[] ReadToExcelSheet<TData>(ExcelWorksheet workSheet, Func<TData, TData> onUpdateData = null) where TData : new()
+        public static void ReadToExcelSheet<TData>(ExcelWorksheet workSheet, out TData[] datas, Func<TData, TData> onUpdateData = null) where TData : new()
         {
             int rowCount = workSheet.Dimension.End.Row;
             int colCount = workSheet.Dimension.End.Column;
@@ -14,9 +31,10 @@ namespace Weariness.Util.CSV
             
             // 첫 행이 헤더
             (var headers, int rowHeaderIndex) = FindHeaderToExcelSheet(workSheet);
-            List<TData> dataList = new();
+            
             // TData의 Field, Property의 데이터를 매핑
             var typeSetters = ReflectionCache.TypeSetters<TData>();
+            List<TData> dataList = new(rowCount - rowHeaderIndex);
             for (int row = rowHeaderIndex + 1; row <= rowCount; row++)
             {
                 var data = new TData();
@@ -39,7 +57,7 @@ namespace Weariness.Util.CSV
                 dataList.Add(data);
             }
 
-            return dataList.ToArray();
+            datas = dataList.ToArray();
         }
 
         private static (Dictionary<string,int> haeders, int index) FindHeaderToExcelSheet(ExcelWorksheet workSheet)
