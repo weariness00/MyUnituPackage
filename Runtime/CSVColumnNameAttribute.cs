@@ -2,7 +2,7 @@
 
 namespace Weariness.Util.CSV
 {
-    [System.AttributeUsage(System.AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CSVColumnNameAttribute : Attribute
     {
         public string Name { get; }
