@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -10,10 +11,15 @@ namespace Weariness.Transition
     {
         public ImageTransition ImageTransition { get; set; }
 
+        public Vector2Int GetIndexLength(Vector2Int grid)
+        {
+            return grid;
+        }
+
         public int GetIndex(int x, int y)
         {
             if (y * x + x >= ImageTransition.originBlocks.Length) return -1;
-            return y * x + x;
+            return y * ImageTransition.grid.x + x;
         }
 
         public void UpdateVert(out TransitionUIBlock[] originBlocks)
@@ -99,11 +105,6 @@ namespace Weariness.Transition
             }
 
             originBlocks = blockList.ToArray();
-        }
-
-        public void Transition(TextAnchor childAlignment, float delay, TransitionEase ease, CancellationTokenSource cts, Func<int, float, TransitionEase, CancellationToken, UniTask> UpdateBlockAsync)
-        {
-            
         }
     }
 }

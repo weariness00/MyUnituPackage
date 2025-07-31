@@ -9,8 +9,8 @@ namespace Weariness.Transition
     {
         public ImageTransition ImageTransition { get; set; }
 
+        public Vector2Int GetIndexLength(Vector2Int grid);
         public int GetIndex(int x, int y);
         public void UpdateVert(out TransitionUIBlock[] originBlocks);
-        public void Transition(TextAnchor childAlignment, float delay, TransitionEase ease, CancellationTokenSource cts, Func<int, float, TransitionEase, CancellationToken, UniTask> UpdateBlockAsync);
     }
 }

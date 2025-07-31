@@ -62,12 +62,6 @@ namespace Weariness.Transition
                     vh.AddTriangle(block.triangles[index * 3 + 0], block.triangles[index * 3 + 1], block.triangles[index * 3 + 2]);
             }
         }
-
-        public override void SetVerticesDirty()
-        {
-            base.SetVerticesDirty();
-        }
-
         protected override void OnRectTransformDimensionsChange()
         {
             handler.UpdateVert(out originBlocks);
@@ -173,7 +167,6 @@ namespace Weariness.Transition
         public CancellationTokenSource TransitionFlash(float duration, float delay, TransitionEase ease = TransitionEase.Linear, bool isOnOff = true)
         {
             var ro = new Vector3(0, 0, 45);
-            ;
             var sc = Vector3.zero;
             var co = new Color32(255, 255, 255, 0);
 
@@ -196,7 +189,139 @@ namespace Weariness.Transition
 
             cts = new();
             
-            handler.Transition(childAlignment, delay, ease, cts, UpdateBlockAsync);
+            var delayInterval = delay / originBlocks.Length;
+            var index = handler.GetIndexLength(grid);
+            int i = 0;
+            switch (childAlignment)
+            {
+                // Upeer
+                case TextAnchor.UpperLeft:
+                    for (int sum = 0; sum <= index.x + index.y - 2; sum++)
+                    {
+                        for (int x = Math.Min(index.x - 1, sum); x >= 0; x--)
+                        {
+                            int y = sum - x;
+                            var blockIndex = handler.GetIndex(x, index.y - y - 1);
+                            if (blockIndex == -1) continue;
+                            if (y >= 0 && y < index.y)
+                            {
+                                UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                                ++i;
+                            }
+                        }
+                    }
+                    break;
+                case TextAnchor.UpperCenter:
+                    foreach (var posList in GetLayeredPositions(index, index.x / 2, index.y))
+                    {
+                        foreach (var (x, y) in posList)
+                        {
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                        }
+
+                        i++;
+                    }
+
+                    break;
+                case TextAnchor.UpperRight:
+                    for (int sum = index.x + index.y - 2 + 0; sum >= 0; sum--)
+                    {
+                        for (int x = Math.Min(index.x - 1, sum); x >= 0; x--)
+                        {
+                            int y = sum - x;
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            if (y >= 0 && y < index.y)
+                            {
+                                UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                                ++i;
+                            }
+                        }
+                    }
+
+                    break;
+
+                // Middle
+                case TextAnchor.MiddleLeft:
+                    break;
+                case TextAnchor.MiddleCenter:
+                    foreach (var posList in GetLayeredPositions(index, index.x / 2, index.y / 2))
+                    {
+                        foreach (var (x, y) in posList)
+                        {
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                        }
+
+                        i++;
+                    }
+                    break;
+                case TextAnchor.MiddleRight:
+                    for (int x = index.x - 1; x >= 0; x--)
+                    {
+                        for (int y = 0; y < index.y; y++)
+                        {
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                            i++;
+                        }
+                    }
+
+                    break;
+
+                // Lower
+                case TextAnchor.LowerLeft:
+                    for (int sum = 0; sum <= index.x + index.y - 2; sum++) // sum = x + y
+                    {
+                        for (int x = Math.Min(index.x - 1, sum); x >= 0; x--)
+                        {
+                            int y = sum - x;
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            if (y >= 0 && y < index.y)
+                            {
+                                UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                                ++i;
+                            }
+                        }
+                    }
+
+                    break;
+                case TextAnchor.LowerCenter:
+                    foreach (var posList in GetLayeredPositions(index, index.x / 2, 0))
+                    {
+                        foreach (var (x, y) in posList)
+                        {
+                            var blockIndex = handler.GetIndex(x, y);
+                            if (blockIndex == -1) continue;
+                            UpdateBlockAsync(blockIndex, i * delayInterval, ease, cts.Token).Forget();
+                        }
+
+                        i++;
+                    }
+                    break;
+                case TextAnchor.LowerRight:
+                    for (int sum = index.x + index.y - 2 + 0; sum >= 0; sum--)
+                    {
+                        for (int x = Math.Min(index.x - 1, sum); x >= 0; x--)
+                        {
+                            int y = sum - x;
+                            var blockIndex = handler.GetIndex(x, index.y - y - 1);
+                            if (blockIndex == -1) continue;
+                            if (y >= 0 && y < index.y)
+                            {
+                                UpdateBlockAsync(blockIndex, i * delayInterval,ease, cts.Token).Forget();
+                                ++i;
+                            }
+                        }
+                    }
+
+                    break;
+            }
             UpdateDrawVerticesAsync(duration + delay, cts.Token).Forget();
 
             return cts;
@@ -239,6 +364,36 @@ namespace Weariness.Transition
                     originBlocks[blockIndex].vertices[3].color = coEnd;
                 }
             }
+            
+            IEnumerable<List<(int x, int y)>> GetLayeredPositions(Vector2Int arrIndex, int cx, int cy)
+            {
+                var layers = new Dictionary<int, List<(int x, int y)>>();
+
+                for (int x = 0; x < arrIndex.x; x++)
+                {
+                    for (int y = 0; y < arrIndex.y; y++)
+                    {
+                        int dist = Math.Abs(x - cx) + Math.Abs(y - cy); // Manhattan distance
+                        if (!layers.ContainsKey(dist))
+                            layers[dist] = new List<(int x, int y)>();
+                        layers[dist].Add((x, y));
+                    }
+                }
+
+                delayInterval = delay / (float)layers.Count;
+
+                int maxDistance = layers.Keys.Max();
+                for (int i = 0; i <= maxDistance; i++)
+                {
+                    if (layers.TryGetValue(i, out var layer))
+                        yield return layer;
+                }
+            }
+        }
+        
+        public void Transition(TransitionData data, CancellationTokenSource cts, Func<int, float, TransitionEase, CancellationToken, UniTask> UpdateBlockAsync)
+        {
+            
         }
 
         private async UniTask UpdateDrawVerticesAsync(float duration, CancellationToken token)
