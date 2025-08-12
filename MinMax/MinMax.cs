@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Weariness.Util
@@ -24,6 +25,19 @@ namespace Weariness.Util
         {
             _min = min;
             _max = max;
+        }
+
+        public void Clamp(T value)
+        {
+            var c = Comparer<T>.Default;
+            if (c.Compare(value, _min) < 0)
+            {
+                _min = value;
+            }
+            else if (c.Compare(value, _max) > 0)
+            {
+                _max = value;
+            }
         }
     }
 
@@ -243,16 +257,16 @@ namespace Weariness.Util
         {
             if (isIncludeLeft && isIncludeRight)
                 return range.Min.x <= value.x && value.x <= range.Max.x &&
-                       range.Min.z <= value.z && value.z <= range.Max.z;
+                       range.Min.z <= value.y && value.y <= range.Max.z;
             else if (isIncludeLeft)
                 return range.Min.x <= value.x && value.x < range.Max.x &&
-                       range.Min.z <= value.z && value.z < range.Max.z;
+                       range.Min.z <= value.y && value.y < range.Max.z;
             else if (isIncludeRight)
                 return range.Min.x < value.x && value.x <= range.Max.x &&
-                       range.Min.z < value.z && value.z <= range.Max.z;
+                       range.Min.z < value.y && value.y <= range.Max.z;
             else
                 return range.Min.x < value.x && value.x < range.Max.x &&
-                       range.Min.z < value.z && value.z < range.Max.z;
+                       range.Min.z < value.y && value.y < range.Max.z;
         }
 
         public static bool IsInRangeYZ(this MinMax<Vector3> range, Vector2 value, bool isIncludeLeft = true, bool isIncludeRight = true)
