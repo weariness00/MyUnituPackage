@@ -28,8 +28,9 @@ namespace Weariness.Util
         public bool isOverMax; // 기존의 Max보다 높은 값을 허용 할 것인지
         public bool isOverMin; // 기존의 Min보다 낮은 값을 허용 할 것인지
         
-        private Comparer<T> _comparer = Comparer<T>.Default;
-        
+        private Comparer<T> cashedComparer;
+        private Comparer<T> Comparer => cashedComparer ??= Comparer<T>.Default;
+
         public event Action<MinMaxValue<T>> onChangeValueMin;
         public event Action<MinMaxValue<T>> onChangeValueMax;
         public event Action<MinMaxValue<T>> onChangeValueCurrent;
@@ -50,7 +51,7 @@ namespace Weariness.Util
             }
             set
             {
-                if (_comparer.Compare(_current, value) != 0)
+                if (Comparer.Compare(_current, value) != 0)
                 {
                     _current = value;
                     CheckCurrent();
@@ -63,13 +64,13 @@ namespace Weariness.Util
             get => _min;
             set
             {
-                if(_comparer.Compare(_min, value) != 0)
+                if(Comparer.Compare(_min, value) != 0)
                 {
                     var prevCurrent = _current;
                     _min = value; 
                     CheckCurrent();
                     onChangeValueMin?.Invoke(this);
-                    if (_comparer.Compare(prevCurrent, _current) != 0)
+                    if (Comparer.Compare(prevCurrent, _current) != 0)
                         onChangeValueCurrent?.Invoke(this);
                 }
             }
@@ -80,13 +81,13 @@ namespace Weariness.Util
             get => _max;
             set
             {
-                if (_comparer.Compare(_max, value) != 0)
+                if (Comparer.Compare(_max, value) != 0)
                 {
                     var prevCurrent = _current;
                     _max = value;
                     onChangeValueMax?.Invoke(this);
                     CheckCurrent();
-                    if (_comparer.Compare(prevCurrent, _current) != 0)
+                    if (Comparer.Compare(prevCurrent, _current) != 0)
                         onChangeValueCurrent?.Invoke(this);
                 }
             }
@@ -133,11 +134,11 @@ namespace Weariness.Util
         void CheckCurrent()
         {
             _isMin = _isMax = false;
-            if (_comparer.Compare(_min, _max) == 0)
+            if (Comparer.Compare(_min, _max) == 0)
             {
                 _isMin = _isMax = true;
             }
-            if (_comparer.Compare(_current, _min) <= 0)
+            if (Comparer.Compare(_current, _min) <= 0)
             {
                 if (isOverMin == false)
                 {
@@ -145,7 +146,7 @@ namespace Weariness.Util
                 }
                 _isMin = true;
             }
-            else if (_comparer.Compare(_current, _max) >= 0)
+            else if (Comparer.Compare(_current, _max) >= 0)
             {
                 if (isOverMax == false)
                 {

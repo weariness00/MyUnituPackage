@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,17 +9,31 @@ namespace Weariness.Util
     {
         [SerializeField] private T _min;
         [SerializeField] private T _max;
+        
+        public event Action<MinMax<T>> onChangedValue; 
+        public event Action<T> onChangedValueMin;
+        public event Action<T> onChangedValueMax; 
 
         public T Min
         {
             get => _min;
-            set => _min = value;
+            set
+            {
+                _min = value;
+                onChangedValueMin?.Invoke(_min);
+                onChangedValue?.Invoke(this);
+            }      
         }
 
         public T Max
         {
             get => _max;
-            set => _max = value;
+            set
+            {
+                _max = value;
+                onChangedValueMin?.Invoke(_max);
+                onChangedValue?.Invoke(this);
+            }    
         }
 
         public MinMax(T min, T max)

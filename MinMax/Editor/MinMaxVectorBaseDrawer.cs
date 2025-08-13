@@ -3,14 +3,13 @@ using UnityEngine;
 
 namespace Weariness.Util.Editor
 {
-    // =========================
-    // Vector2 / Vector3 / Vector2Int / Vector3Int (2줄 고정)
-    // =========================
-
     public abstract class MinMaxVectorBaseDrawer : PropertyDrawer
     {
-        const float MiniLabelWidth = 34f; // "Min", "Max" 라벨
-        const float GapY = 2f;            // 줄 간격
+        const float GapX = 4f;
+        const float GapMid = 8f;
+        const float GapRow = 2f;
+        const float TildeWidth = 16f;
+        const float AxisLabelWidth = 18f;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -19,99 +18,146 @@ namespace Weariness.Util.Editor
             var minProp = property.FindPropertyRelative("_min");
             var maxProp = property.FindPropertyRelative("_max");
 
-            // 전체 라벨
-            position = EditorGUI.PrefixLabel(position, label);
-
+            int rows = GetComponentCount(minProp);
             float line = EditorGUIUtility.singleLineHeight;
 
-            // 첫째 줄: Min
-            var minRow = new Rect(position.x, position.y, position.width, line);
-            // 둘째 줄: Max
-            var maxRow = new Rect(position.x, position.y + line + EditorGUIUtility.standardVerticalSpacing + GapY, position.width, line);
+            // 첫 줄: 라벨만
+            Rect labelRect = new Rect(position.x, position.y, position.width, line);
+            EditorGUI.LabelField(labelRect, label);
 
-            int oldIndent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
+            // 값 줄 시작 위치
+            float y = position.y + line + EditorGUIUtility.standardVerticalSpacing;
 
-            DrawLabeledVectorField(minRow, "Min", minProp);
-            DrawLabeledVectorField(maxRow, "Max", maxProp);
+            switch (minProp.propertyType)
+            {
+                case SerializedPropertyType.Vector2:
+                {
+                    Vector2 min = minProp.vector2Value;
+                    Vector2 max = maxProp.vector2Value;
 
-            EditorGUI.indentLevel = oldIndent;
+                    (min.x, max.x) = DrawRowFloat('X', min.x, max.x, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.y, max.y) = DrawRowFloat('Y', min.y, max.y, new Rect(position.x, y, position.width, line));
+
+                    minProp.vector2Value = min;
+                    maxProp.vector2Value = max;
+                    break;
+                }
+                case SerializedPropertyType.Vector3:
+                {
+                    Vector3 min = minProp.vector3Value;
+                    Vector3 max = maxProp.vector3Value;
+
+                    (min.x, max.x) = DrawRowFloat('X', min.x, max.x, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.y, max.y) = DrawRowFloat('Y', min.y, max.y, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.z, max.z) = DrawRowFloat('Z', min.z, max.z, new Rect(position.x, y, position.width, line));
+
+                    minProp.vector3Value = min;
+                    maxProp.vector3Value = max;
+                    break;
+                }
+                case SerializedPropertyType.Vector2Int:
+                {
+                    Vector2Int min = minProp.vector2IntValue;
+                    Vector2Int max = maxProp.vector2IntValue;
+
+                    (min.x, max.x) = DrawRowInt('X', min.x, max.x, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.y, max.y) = DrawRowInt('Y', min.y, max.y, new Rect(position.x, y, position.width, line));
+
+                    minProp.vector2IntValue = min;
+                    maxProp.vector2IntValue = max;
+                    break;
+                }
+                case SerializedPropertyType.Vector3Int:
+                {
+                    Vector3Int min = minProp.vector3IntValue;
+                    Vector3Int max = maxProp.vector3IntValue;
+
+                    (min.x, max.x) = DrawRowInt('X', min.x, max.x, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.y, max.y) = DrawRowInt('Y', min.y, max.y, new Rect(position.x, y, position.width, line));
+                    y += line + EditorGUIUtility.standardVerticalSpacing + GapRow;
+
+                    (min.z, max.z) = DrawRowInt('Z', min.z, max.z, new Rect(position.x, y, position.width, line));
+
+                    minProp.vector3IntValue = min;
+                    maxProp.vector3IntValue = max;
+                    break;
+                }
+                default:
+                    EditorGUI.HelpBox(new Rect(position.x, y, position.width, line), "지원되지 않는 벡터 타입입니다.", MessageType.Warning);
+                    break;
+            }
 
             EditorGUI.EndProperty();
             property.serializedObject.ApplyModifiedProperties();
         }
 
-        void DrawLabeledVectorField(Rect row, string miniLabel, SerializedProperty prop)
+        (float, float) DrawRowFloat(char axis, float min, float max, Rect row)
         {
-            // 왼쪽 작은 라벨
-            var labelRect = new Rect(row.x, row.y, MiniLabelWidth, row.height);
-            EditorGUI.LabelField(labelRect, miniLabel);
+            SplitRow(row, out Rect axisRect, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
+            EditorGUI.LabelField(axisRect, axis.ToString(), EditorStyles.centeredGreyMiniLabel);
+            min = EditorGUI.FloatField(leftRect, min);
+            EditorGUI.LabelField(tildeRect, "~", EditorStyles.centeredGreyMiniLabel);
+            max = EditorGUI.FloatField(rightRect, max);
+            return (min, max);
+        }
 
-            // 필드 영역
-            var fieldRect = new Rect(labelRect.xMax + 4f, row.y, row.width - MiniLabelWidth - 4f, row.height);
+        (int, int) DrawRowInt(char axis, int min, int max, Rect row)
+        {
+            SplitRow(row, out Rect axisRect, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
+            EditorGUI.LabelField(axisRect, axis.ToString(), EditorStyles.centeredGreyMiniLabel);
+            min = EditorGUI.IntField(leftRect, min);
+            EditorGUI.LabelField(tildeRect, "~", EditorStyles.centeredGreyMiniLabel);
+            max = EditorGUI.IntField(rightRect, max);
+            return (min, max);
+        }
 
-            switch (prop.propertyType)
+        void SplitRow(Rect row, out Rect axis, out Rect left, out Rect tilde, out Rect right)
+        {
+            float usableW = row.width - GapX * 2 - AxisLabelWidth - TildeWidth - GapMid * 2;
+            float halfW = usableW * 0.5f;
+            axis = new Rect(row.x + GapX, row.y, AxisLabelWidth, row.height);
+            left = new Rect(axis.xMax, row.y, halfW, row.height);
+            tilde = new Rect(left.xMax + GapMid, row.y, TildeWidth, row.height);
+            right = new Rect(tilde.xMax + GapMid, row.y, halfW, row.height);
+        }
+
+        int GetComponentCount(SerializedProperty vecProp)
+        {
+            return vecProp.propertyType switch
             {
-                case SerializedPropertyType.Vector2:
-                    prop.vector2Value = EditorGUI.Vector2Field(fieldRect, GUIContent.none, prop.vector2Value);
-                    break;
-
-                case SerializedPropertyType.Vector3:
-                    prop.vector3Value = EditorGUI.Vector3Field(fieldRect, GUIContent.none, prop.vector3Value);
-                    break;
-
-                case SerializedPropertyType.Vector2Int:
-#if UNITY_2021_2_OR_NEWER
-                    prop.vector2IntValue = EditorGUI.Vector2IntField(fieldRect, GUIContent.none, prop.vector2IntValue);
-#else
-                    // 구버전 폴백: 요소별 입력
-                    var v2i = prop.vector2IntValue;
-                    float w2 = fieldRect.width * 0.5f;
-                    v2i.x = EditorGUI.IntField(new Rect(fieldRect.x + 0 * w2, fieldRect.y, w2 - 2, fieldRect.height), v2i.x);
-                    v2i.y = EditorGUI.IntField(new Rect(fieldRect.x + 1 * w2 + 2, fieldRect.y, w2 - 2, fieldRect.height), v2i.y);
-                    prop.vector2IntValue = v2i;
-#endif
-                    break;
-
-                case SerializedPropertyType.Vector3Int:
-#if UNITY_2021_2_OR_NEWER
-                    prop.vector3IntValue = EditorGUI.Vector3IntField(fieldRect, GUIContent.none, prop.vector3IntValue);
-#else
-                    // 구버전 폴백: 요소별 입력
-                    var v3i = prop.vector3IntValue;
-                    float w3 = fieldRect.width / 3f;
-                    v3i.x = EditorGUI.IntField(new Rect(fieldRect.x + 0 * w3, fieldRect.y, w3 - 2, fieldRect.height), v3i.x);
-                    v3i.y = EditorGUI.IntField(new Rect(fieldRect.x + 1 * w3, fieldRect.y, w3 - 2, fieldRect.height), v3i.y);
-                    v3i.z = EditorGUI.IntField(new Rect(fieldRect.x + 2 * w3, fieldRect.y, w3 - 2, fieldRect.height), v3i.z);
-                    prop.vector3IntValue = v3i;
-#endif
-                    break;
-
-                default:
-                    EditorGUI.HelpBox(fieldRect, "지원되지 않는 벡터 타입", MessageType.Warning);
-                    break;
-            }
+                SerializedPropertyType.Vector2 => 2,
+                SerializedPropertyType.Vector2Int => 2,
+                SerializedPropertyType.Vector3 => 3,
+                SerializedPropertyType.Vector3Int => 3,
+                _ => 0
+            };
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            // 2줄 + 간격 고정
-            return (EditorGUIUtility.singleLineHeight * 2)
-                 + EditorGUIUtility.standardVerticalSpacing
-                 + GapY;
+            var minProp = property.FindPropertyRelative("_min");
+            int rows = GetComponentCount(minProp);
+            if (rows <= 0) return EditorGUIUtility.singleLineHeight;
+
+            float line = EditorGUIUtility.singleLineHeight;
+            // 라벨 한 줄 + 값 줄 n개
+            return line + EditorGUIUtility.standardVerticalSpacing +
+                   rows * line + (rows - 1) * (EditorGUIUtility.standardVerticalSpacing + GapRow);
         }
     }
 
-    // 아래 4개는 '타입 매핑'만 담당하는 얇은 래퍼
-    [CustomPropertyDrawer(typeof(MinMax<Vector2>))]
-    public class MinMaxVector2Drawer : MinMaxVectorBaseDrawer { }
-
-    [CustomPropertyDrawer(typeof(MinMax<Vector3>))]
-    public class MinMaxVector3Drawer : MinMaxVectorBaseDrawer { }
-
-    [CustomPropertyDrawer(typeof(MinMax<Vector2Int>))]
-    public class MinMaxVector2IntDrawer : MinMaxVectorBaseDrawer { }
-
-    [CustomPropertyDrawer(typeof(MinMax<Vector3Int>))]
-    public class MinMaxVector3IntDrawer : MinMaxVectorBaseDrawer { }
+    [CustomPropertyDrawer(typeof(MinMax<Vector2>))]   public class MinMaxVector2Drawer : MinMaxVectorBaseDrawer { }
+    [CustomPropertyDrawer(typeof(MinMax<Vector3>))]   public class MinMaxVector3Drawer : MinMaxVectorBaseDrawer { }
+    [CustomPropertyDrawer(typeof(MinMax<Vector2Int>))]public class MinMaxVector2IntDrawer : MinMaxVectorBaseDrawer { }
+    [CustomPropertyDrawer(typeof(MinMax<Vector3Int>))]public class MinMaxVector3IntDrawer : MinMaxVectorBaseDrawer { }
 }
