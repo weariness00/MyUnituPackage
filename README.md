@@ -92,7 +92,7 @@ public class VolumeSetting : MonoBehaviour
 * **Inspector 친화적 UI**
 
     * `MinMaxValue<T>`: 한 줄에 **Min / Current / Max** 정렬, 즉시 입력 보정
-    * `MinMax<T>`: Min/Max만 간결하게 표시
+    * `MinMax<T>`: **Min/Max**만 간결하게 표시
 * **커스텀 드로어**
 
     * `[CustomPropertyDrawer]` 기반 깔끔한 라벨/필드 배치
@@ -139,19 +139,8 @@ public class VolumeSetting : MonoBehaviour
 * **권장 사항**
 
     * 대량 생성/파괴가 잦으면 **객체 풀링** 또는 **필드 재사용**으로 GC 압력 완화
-    * “현재값이 필요 없는” 지점은 \*\*`MinMax<T>`\*\*로 대체해 불필요 필드/연산 최소화
+    * “현재값이 필요 없는” 지점은 **MinMax<T>** 로 대체해 불필요 필드/연산 최소화
     * 빈번한 수치 갱신 루프에서는 `Current` 변경이 **Clamp 1회**로 귀결되도록 상위 로직 단순화
-
----
-
-## 설치 & 사용법 (예시)
-
-> 실제 패키지 경로나 네임스페이스는 저장소 기준으로 조정하세요.
-
-1. 소스 코드 임포트 또는 UPM(Git URL)로 설치
-2. 스크립트에서 `using Weariness.MinMax;` 추가
-3. 컴포넌트/데이터 필드에 `MinMaxValue<int>`, `MinMaxValue<float>` 등 선언
-4. 인스펙터에서 한 줄 UI로 값 편집, 런타임 중 `Current` 변경 시 자동 보정 확인
 
 ---
 
@@ -160,29 +149,6 @@ public class VolumeSetting : MonoBehaviour
 * 한 줄 배치: **Min / Current / Max**
 * 입력 즉시 Clamp 및 상태 플래그(`IsMin`, `IsMax`) 시각 보조(있다면)
 * 숫자 폭/소수점 자리수 자동 최적화(있다면)로 UI 폭 낭비 최소화
-
----
-
-## 경계조건 & 에러 처리 가이드
-
-* `Min > Max` 입력 시: 에디터에서 경고/자동 스왑/보정 중 하나를 적용(저장소 구현에 맞춰 처리)
-* `Current`가 범위를 벗어나는 입력: 즉시 **Clamp**
-* 제네릭 타입 `T`는 `struct, IComparable<T>` 제약 충족 필요
-
----
-
-## 제한사항 & 주의점
-
-* `MinMaxValue<T>`는 클래스이므로 **참조语의 공유**에 유의(필드 복사/레퍼런스 전달 시 의도 확인)
-* 에디터 드로어는 **Unity Editor 전용**, 런타임 빌드에는 포함되지 않도록 어셈블리 정의/전처리 분리 권장
-
----
-
-## 로드맵(제안)
-
-* `double`, `long` 등 추가 타입 드로어
-* 인스펙터에서 **정규화 슬라이더(0\~1)** ↔ 실제 값 동기화 옵션
-* OpenUPM 메타데이터/샘플 씬 동봉
 
 ---
 
