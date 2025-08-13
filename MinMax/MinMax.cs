@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using UnityEngine;
 
 namespace Weariness.Util
@@ -82,6 +83,32 @@ namespace Weariness.Util
         }
     }
 
+    // long
+    public static partial class MinMaxExtension
+    {
+        public static long Length(this MinMax<long> value)
+        {
+            return Math.Abs(value.Min) + Math.Abs(value.Max);
+        }
+
+        public static float Random(this MinMax<long> value, bool includeMax = false)
+        {
+            return UnityEngine.Random.Range(value.Min, value.Max + (includeMax ? 1 : 0));
+        }
+
+        public static bool IsInRange(this MinMax<long> range, long value, bool isIncludeLeft = true, bool isIncludeRight = true)
+        {
+            if (isIncludeLeft && isIncludeRight)
+                return range.Min <= value && value <= range.Max;
+            else if (isIncludeLeft)
+                return range.Min <= value && value <= range.Max;
+            else if (isIncludeRight)
+                return range.Min < value && value <= range.Max;
+            else
+                return range.Min < value && value < range.Max;
+        }
+    }
+    
     // float
     public static partial class MinMaxExtension
     {
@@ -108,6 +135,33 @@ namespace Weariness.Util
         }
     }
 
+    // double
+    public static partial class MinMaxExtension
+    {
+        public static double Length(this MinMax<double> value)
+        {
+            return Math.Abs(value.Min) + Math.Abs(value.Max);
+        }
+
+        public static double Random(this MinMax<double> value)
+        {
+            var rand = new System.Random();
+            return value.Min + rand.NextDouble() * (value.Max - value.Min);
+        }
+
+        public static bool IsInRange(this MinMax<double> range, double value, bool isIncludeLeft = true, bool isIncludeRight = true)
+        {
+            if (isIncludeLeft && isIncludeRight)
+                return range.Min <= value && value <= range.Max;
+            else if (isIncludeLeft)
+                return range.Min <= value && value <= range.Max;
+            else if (isIncludeRight)
+                return range.Min < value && value <= range.Max;
+            else
+                return range.Min < value && value < range.Max;
+        }
+    }
+    
     // Vector2
     public static partial class MinMaxExtension
     {

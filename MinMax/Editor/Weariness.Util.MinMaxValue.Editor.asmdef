@@ -2,8 +2,7 @@
     "name": "Weariness.Util.MinMaxValue.Editor",
     "rootNamespace": "Weariness.Util",
     "references": [
-        "Weariness.Util.MinMaxValue",
-        "Weariness.Util.Extensions"
+        "Weariness.Util.MinMaxValue"
     ],
     "includePlatforms": [
         "Editor"
