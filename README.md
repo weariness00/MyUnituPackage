@@ -1,4 +1,4 @@
-# MinMaxValue / MinMax (Unity) — 포트폴리오 개요
+# MinMaxValue / MinMax
 
 GitHub: [https://github.com/weariness00/MyUnituPackage/tree/MinMaxValue](https://github.com/weariness00/MyUnituPackage/tree/MinMaxValue)
 
