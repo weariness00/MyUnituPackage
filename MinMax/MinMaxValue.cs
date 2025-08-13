@@ -31,9 +31,9 @@ namespace Weariness.Util
         private Comparer<T> cashedComparer;
         private Comparer<T> Comparer => cashedComparer ??= Comparer<T>.Default;
 
-        public event Action<MinMaxValue<T>> onChangeValueMin;
-        public event Action<MinMaxValue<T>> onChangeValueMax;
-        public event Action<MinMaxValue<T>> onChangeValueCurrent;
+        public event Action<T> onChangeValueMin;
+        public event Action<T> onChangeValueMax;
+        public event Action<T> onChangeValueCurrent;
         
         public static implicit operator T(MinMaxValue<T> value)
         {
@@ -55,7 +55,7 @@ namespace Weariness.Util
                 {
                     _current = value;
                     CheckCurrent();
-                    onChangeValueCurrent?.Invoke(this);
+                    onChangeValueCurrent?.Invoke(_current);
                 }
             }
         }
@@ -69,9 +69,9 @@ namespace Weariness.Util
                     var prevCurrent = _current;
                     _min = value; 
                     CheckCurrent();
-                    onChangeValueMin?.Invoke(this);
+                    onChangeValueMin?.Invoke(_min);
                     if (Comparer.Compare(prevCurrent, _current) != 0)
-                        onChangeValueCurrent?.Invoke(this);
+                        onChangeValueCurrent?.Invoke(_current);
                 }
             }
         }
@@ -85,10 +85,10 @@ namespace Weariness.Util
                 {
                     var prevCurrent = _current;
                     _max = value;
-                    onChangeValueMax?.Invoke(this);
+                    onChangeValueMax?.Invoke(_max);
                     CheckCurrent();
                     if (Comparer.Compare(prevCurrent, _current) != 0)
-                        onChangeValueCurrent?.Invoke(this);
+                        onChangeValueCurrent?.Invoke(_current);
                 }
             }
         }
