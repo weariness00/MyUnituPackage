@@ -1,5 +1,5 @@
 {
-    "name": "Weariness.Util.Extensions",
+    "name": "Weariness.Util",
     "rootNamespace": "Weariness.Util",
     "references": [
         "Unity.Collections",

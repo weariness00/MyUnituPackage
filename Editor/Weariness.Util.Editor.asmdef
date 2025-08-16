@@ -2,7 +2,7 @@
     "name": "Weariness.Util.Editor",
     "rootNamespace": "Weariness.Util",
     "references": [
-        "Weariness.Util.Extensions"
+        "Weariness.Util"
     ],
     "includePlatforms": [
         "Editor"

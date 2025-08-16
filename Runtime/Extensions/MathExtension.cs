@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Weariness.Util
+namespace Weariness.Util.Extensions
 {
     public static class MathExtension
     {

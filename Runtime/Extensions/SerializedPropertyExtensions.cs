@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEditor;
 
-namespace Weariness.Util
+namespace Weariness.Util.Extensions
 {
     public static class SerializedPropertyExtensions
     {

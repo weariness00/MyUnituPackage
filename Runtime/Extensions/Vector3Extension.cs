@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Util
+namespace Weariness.Util.Extensions
 {
     public struct Vector3Extension
     {
