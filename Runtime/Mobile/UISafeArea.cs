@@ -1,11 +1,44 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
+using Weariness.Util.Managers;
 
 namespace Weariness.Util.Mobile
 {
     [RequireComponent(typeof(RectTransform))]
     public class SafeAreaApplier : MonoBehaviour
     {
+        private static bool isNavBarRectInitStart = false;
+        private static bool NavBarRectInitDone = false;
+        private static Rect NoneFullScreenSafeArea = Rect.zero;
+        private static Rect FullScreenSafeArea = Rect.zero;
+
+        public Rect SafeArea
+        {
+            get
+            {
+                var area = Screen.safeArea;
+                var navBarRect = Rect.zero;
+                navBarRect.position = FullScreenSafeArea.position + NoneFullScreenSafeArea.size;
+                navBarRect.size = FullScreenSafeArea.size - NoneFullScreenSafeArea.size;
+
+#if UNITY_ANDROID
+                if(Screen.orientation == ScreenOrientation.LandscapeLeft || 
+                   Screen.orientation == ScreenOrientation.LandscapeRight)
+                {
+                    area.width -= navBarRect.width;
+                }
+                else if (Screen.orientation == ScreenOrientation.Portrait || 
+                         Screen.orientation == ScreenOrientation.PortraitUpsideDown)
+                {
+                    area.height -= navBarRect.height;
+                }
+#endif
+
+                return area;
+            }
+        }
+        
         public RectTransform rectTransform; // 비워두면 자기 자신
 
         [Header("축별 적용")] public bool affectX = true;
@@ -69,7 +102,6 @@ namespace Weariness.Util.Mobile
             try
             {
                 var rt = rectTransform ? rectTransform : (RectTransform)transform;
-                ;
                 if (!rt) return;
 
                 //safeArea를 받아서 min 앵커와 max 앵커에 Position 부여
@@ -77,6 +109,23 @@ namespace Weariness.Util.Mobile
                 var safeArea = Screen.safeArea;
                 var screen = new Vector2(Screen.width, Screen.height);
 
+#if UNITY_ANDROID
+                if(NavBarRectInitDone == false) CoroutineManager.Play("SafeAreaInit", ApplyAsync());
+                var navBarRect = Rect.zero;
+                navBarRect.position = FullScreenSafeArea.position + NoneFullScreenSafeArea.size;
+                navBarRect.size = FullScreenSafeArea.size - NoneFullScreenSafeArea.size;
+
+                if(Screen.orientation == ScreenOrientation.LandscapeLeft || 
+                   Screen.orientation == ScreenOrientation.LandscapeRight)
+                {
+                    safeArea.width -= navBarRect.width;
+                }
+                else if (Screen.orientation == ScreenOrientation.Portrait || 
+                         Screen.orientation == ScreenOrientation.PortraitUpsideDown)
+                {
+                    safeArea.height -= navBarRect.height;
+                }
+#endif
                 Vector2 minAnchor = safeArea.position;
                 Vector2 maxAnchor = safeArea.position + safeArea.size;
 
@@ -192,6 +241,30 @@ namespace Weariness.Util.Mobile
             {
                 isApplied = false;
             }
+        }
+
+        public IEnumerator ApplyAsync()
+        {
+            if (Screen.fullScreen == false) yield break;
+
+            if (isNavBarRectInitStart)
+            {
+                yield return new WaitUntil(() => NavBarRectInitDone);
+                Apply();
+                yield break;
+            }
+            
+            isNavBarRectInitStart = true;
+            FullScreenSafeArea = Screen.safeArea;
+            Screen.fullScreen = false;
+
+            yield return null;
+            yield return new WaitForEndOfFrame(); // 다음 프레임에 캐시가 업데이트되도록 대기
+            
+            NoneFullScreenSafeArea = Screen.safeArea;
+            Screen.fullScreen = true;
+            NavBarRectInitDone = true;
+            Apply();
         }
     }
 }

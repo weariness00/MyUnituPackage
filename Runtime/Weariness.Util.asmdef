@@ -3,7 +3,8 @@
     "rootNamespace": "Weariness.Util",
     "references": [
         "Unity.Collections",
-        "Unity.Burst"
+        "Unity.Burst",
+        "Unity.VisualScripting.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
