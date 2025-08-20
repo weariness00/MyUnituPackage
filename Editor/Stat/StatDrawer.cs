@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using Weariness.Util.Extensions;
+using Weariness.Util.Extensions.Editor;
 
 namespace Weariness.Util.Editor
 {
