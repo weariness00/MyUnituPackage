@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Weariness.Util.Editor.KeyValue
+namespace Weariness.Util.Container.Editor
 {
     [CustomPropertyDrawer(typeof(KeyValueDictionary<,>), true)]
     public class KeyValueDictionaryDrawer : PropertyDrawer

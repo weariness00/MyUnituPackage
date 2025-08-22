@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Weariness.Util
+namespace Weariness.Util.Container
 {
     /// <summary>
     /// 딕셔너리가 직렬화가 안될때 사용하는 대체제

@@ -8,7 +8,7 @@ namespace Weariness.Util
     [Serializable]
     public class Unique<T>
     {
-        private HashSet<T> uniqueSet = new HashSet<T>(); // À¯ÀÏ¼º ÆÇ´Ü¿ë
+        private HashSet<T> uniqueSet = new HashSet<T>(); // ìœ ì¼ì„± íŒë‹¨ìš©
         [SerializeField] private List<T> list = new List<T>();
 
         public int Length => list.Count;
@@ -49,7 +49,7 @@ namespace Weariness.Util
                 }
                 else
                 {
-                    throw new System.Exception("Unique¸¦ ¸¸µé¾îÁÙ Maker°¡ ¾ø½À´Ï´Ù. IUniqueMaker¸¦ »ó¼Ó¹Ş¾Æ ±¸ÇöÇØÁÖ¼¼¿ä");
+                    throw new System.Exception("Uniqueë¥¼ ë§Œë“¤ì–´ì¤„ Makerê°€ ì—†ìŠµë‹ˆë‹¤. IUniqueMakerë¥¼ ìƒì†ë°›ì•„ êµ¬í˜„í•´ì£¼ì„¸ìš”");
                 }
             }
             maker.UniqueMake(this, start, end);
