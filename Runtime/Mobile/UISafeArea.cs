@@ -12,17 +12,36 @@ namespace Weariness.Util.Mobile
         private static bool NavBarRectInitDone = false;
         private static Rect NoneFullScreenSafeArea = Rect.zero;
         private static Rect FullScreenSafeArea = Rect.zero;
+        
+        public RectTransform rectTransform; // 비워두면 자기 자신
 
+        [Header("축별 적용")] 
+        public bool affectX = true;
+        public bool affectY = true;
+        public bool isNavigationBar = false; // 네비게이션 바 적용 여부
+        
+        [Space]
+        public Vector2 areaSize; // 셀 크기 (비율로 적용)
+        public RectOffset padding; // 여백
+
+        private bool isApplied = true;
+
+        private Vector2 originOffsetMin;
+        private Vector2 originOffsetMax;
+        
         public Rect SafeArea
         {
             get
             {
+                if (isNavigationBar == false) return Screen.safeArea;
+                
                 var area = Screen.safeArea;
                 var navBarRect = Rect.zero;
                 navBarRect.position = FullScreenSafeArea.position + NoneFullScreenSafeArea.size;
                 navBarRect.size = FullScreenSafeArea.size - NoneFullScreenSafeArea.size;
 
 #if UNITY_ANDROID
+                if(NavBarRectInitDone == false) CoroutineManager.Play("SafeAreaInit", ApplyAsync());
                 if(Screen.orientation == ScreenOrientation.LandscapeLeft || 
                    Screen.orientation == ScreenOrientation.LandscapeRight)
                 {
@@ -38,20 +57,6 @@ namespace Weariness.Util.Mobile
                 return area;
             }
         }
-        
-        public RectTransform rectTransform; // 비워두면 자기 자신
-
-        [Header("축별 적용")] public bool affectX = true;
-        public bool affectY = true;
-
-        public Vector2 areaSize; // 셀 크기 (비율로 적용)
-        public RectOffset padding; // 여백
-
-        private bool isApplied = true;
-
-        private Vector2 originOffsetMin;
-        private Vector2 originOffsetMax;
-
         public void Reset()
         {
             rectTransform = GetComponent<RectTransform>();
@@ -106,26 +111,9 @@ namespace Weariness.Util.Mobile
 
                 //safeArea를 받아서 min 앵커와 max 앵커에 Position 부여
                 //픽셀로 반환되니 앵커에 넣기 위해서는 비율로 변환 필요
-                var safeArea = Screen.safeArea;
+                var safeArea = SafeArea;
                 var screen = new Vector2(Screen.width, Screen.height);
-
-#if UNITY_ANDROID
-                if(NavBarRectInitDone == false) CoroutineManager.Play("SafeAreaInit", ApplyAsync());
-                var navBarRect = Rect.zero;
-                navBarRect.position = FullScreenSafeArea.position + NoneFullScreenSafeArea.size;
-                navBarRect.size = FullScreenSafeArea.size - NoneFullScreenSafeArea.size;
-
-                if(Screen.orientation == ScreenOrientation.LandscapeLeft || 
-                   Screen.orientation == ScreenOrientation.LandscapeRight)
-                {
-                    safeArea.width -= navBarRect.width;
-                }
-                else if (Screen.orientation == ScreenOrientation.Portrait || 
-                         Screen.orientation == ScreenOrientation.PortraitUpsideDown)
-                {
-                    safeArea.height -= navBarRect.height;
-                }
-#endif
+                
                 Vector2 minAnchor = safeArea.position;
                 Vector2 maxAnchor = safeArea.position + safeArea.size;
 
