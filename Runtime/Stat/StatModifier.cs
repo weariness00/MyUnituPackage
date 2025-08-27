@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Weariness.Util
 {
@@ -8,18 +9,22 @@ namespace Weariness.Util
     {
         public enum ModifierType { Flat, Percent }
 
-        public float value = default;
+        [SerializeField] protected float value = default;
         public ModifierType type;
 
         public bool isActive;
+        [NonSerialized] private List<Stat> refStatContainer; // 해당 수정자를 참조하고 있는 Stat 들
 
-        [NonSerialized] private List<Stat> refStatContainer = new(); // 해당 수정자를 참조하고 있는 Stat 들
-        [NonSerialized] private bool isDisposed = false;
+        public virtual float Value
+        {
+            get => value;
+            set => this.value = value;
+        }
 
         public StatModifier(ModifierType t)
         {
             value = default;
-            type = ModifierType.Flat;
+            type = t;
         }
         
         public StatModifier(ModifierType t, float value)
@@ -35,27 +40,23 @@ namespace Weariness.Util
             this.isActive = isActive;
         }
 
-        ~StatModifier()
-        {
-            Dispose();
-        }
-
         public void AddRefStat(Stat stat)
         {
+            refStatContainer ??= new();
             refStatContainer.Add(stat);
         }
         
         public void RemoveRefStat(Stat stat)
         {
-            refStatContainer.Remove(stat);
+            refStatContainer?.Remove(stat);
         }
 
         public void Dispose()
         {
-            if (isDisposed == false)
+            if (refStatContainer != null)
             {
-                isDisposed = true;
-                foreach (var stat in refStatContainer)
+                var copyRefStatContainer = refStatContainer.ToArray();
+                foreach (var stat in copyRefStatContainer)
                     stat.RemoveModifier(this);
                 refStatContainer.Clear();
             }

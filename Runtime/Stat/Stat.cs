@@ -15,12 +15,14 @@ namespace Weariness.Util
         
         [SerializeField] private float baseValue;
         [NonSerialized] private float cachedValue; // 캐싱된 최종 값
-        [SerializeField] private List<StatModifier> modifierContainer = new ();
+        [SerializeField] private List<StatModifier> modifierContainer = new (); // 스탯이 소지한 다른 Modifier들
+        
+        // 스탯 자체를 다른 스탯의 수정자로 사용하고 싶을때 사용
+        // 런타임 전용
+        [NonSerialized] private Dictionary<StatModifier.ModifierType, StatModifier> modifiers = new(); 
         
         // 최초 1회만 사용
-        [NonSerialized] private bool isDirty = true; // 값이 변경되었는지 여부
-        
-        [NonSerialized] private bool isDisposed = false;
+        [NonSerialized] private bool isDirty = false; // 값이 변경되었는지 여부
         
         public float BaseValue
         {
@@ -48,11 +50,6 @@ namespace Weariness.Util
             cachedValue = GetValue();
         }
 
-        ~Stat()
-        {
-            Dispose();
-        }
-
         public void AddModifier(StatModifier modifier)
         {
             modifierContainer.Add(modifier);
@@ -67,6 +64,14 @@ namespace Weariness.Util
             cachedValue = GetValue();
         }
 
+        public void ClearModifier(StatModifier modifier)
+        {
+            foreach (var statModifier in modifierContainer)
+                modifier.RemoveRefStat(this);
+            modifierContainer.Clear();
+            cachedValue = GetValue();
+        }
+
         private float GetValue()
         {
             isDirty = true;
@@ -74,22 +79,45 @@ namespace Weariness.Util
             float finalValue = baseValue;
             float percentAdd = 0f;
 
+#if UNITY_EDITOR
+            modifierContainer ??= new();
+#endif
+
             foreach (var mod in modifierContainer)
             {
                 if(mod == null) continue;
                 switch (mod.type)
                 {
                     case StatModifier.ModifierType.Flat:
-                        finalValue += mod.value;
+                        finalValue += mod.Value;
                         break;
                     case StatModifier.ModifierType.Percent:
-                        percentAdd += mod.value;
+                        percentAdd += mod.Value;
                         break;
                 }
             }
 
             finalValue *= (1 + percentAdd);
+            
+            // Inspector 표시용으로 GetValue를 사용하고 있다.
+            // Modifiers는 런타임 전용임으로 Editor에서는 제외
+#if !UNITY_EDITOR
+            foreach (var (key, modifier) in modifiers)
+                modifier.Value = finalValue;
+#endif
             return finalValue;
+        }
+
+        // Stat자체를 Modifier로 변환해주는 함수
+        public StatModifier AsModifier(StatModifier.ModifierType modifierType)
+        {
+            modifiers ??= new();
+            if (!modifiers.TryGetValue(modifierType, out var modifier))
+            {
+                modifier = new(modifierType, GetValue());
+                modifiers[modifierType] = modifier;
+            }
+            return modifier;
         }
 
         public override string ToString()
@@ -99,13 +127,23 @@ namespace Weariness.Util
 
         public void Dispose()
         {
-            if(isDisposed == false)
+            if (modifierContainer != null)
             {
-                isDisposed = true;
-                foreach (var mod in modifierContainer)
-                    mod.RemoveRefStat(this);
+                foreach (var modifier in modifierContainer)
+                    modifier.RemoveRefStat(this);
                 modifierContainer.Clear();
             }
+            if (modifiers != null)
+            {
+                foreach (var (key, modifier) in modifiers)
+                    modifier.Dispose();
+                modifiers.Clear();
+            }
+
+            baseValue = 0;
+            cachedValue = 0;
+
+            isDirty = false;
         }
     }
 

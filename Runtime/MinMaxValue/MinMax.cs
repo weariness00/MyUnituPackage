@@ -10,9 +10,9 @@ namespace Weariness.Util
         [SerializeField] private T _min;
         [SerializeField] private T _max;
         
-        public event Action<MinMax<T>> onChangedValue; 
-        public event Action<T> onChangedValueMin;
-        public event Action<T> onChangedValueMax; 
+        public event Action<MinMax<T>> onChangedCurrent; 
+        public event Action<MinMax<T>> onChangedValueMin;
+        public event Action<MinMax<T>> onChangedValueMax; 
 
         public T Min
         {
@@ -20,8 +20,8 @@ namespace Weariness.Util
             set
             {
                 _min = value;
-                onChangedValueMin?.Invoke(_min);
-                onChangedValue?.Invoke(this);
+                onChangedValueMin?.Invoke(this);
+                onChangedCurrent?.Invoke(this);
             }      
         }
 
@@ -31,8 +31,8 @@ namespace Weariness.Util
             set
             {
                 _max = value;
-                onChangedValueMin?.Invoke(_max);
-                onChangedValue?.Invoke(this);
+                onChangedValueMax?.Invoke(this);
+                onChangedCurrent?.Invoke(this);
             }    
         }
 

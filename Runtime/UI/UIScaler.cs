@@ -68,7 +68,8 @@ namespace Weariness.Util.UI
             rootCanvas = rootCanvas == null ? GetComponentInParent<Canvas>().rootCanvas : rootCanvas.rootCanvas;
             rootCanvasScaler = rootCanvas.GetComponent<CanvasScaler>();
 
-            if (rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay &&
+            if (isDestroy == false &&
+                rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay &&
                 rootCanvasScaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
             {
                 Destroy(this);
