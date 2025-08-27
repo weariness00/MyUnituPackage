@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Weariness.Util
 {
     [Serializable]
-    public class Stat
+    public class Stat : IDisposable
     {
         public static implicit operator float(Stat stat)
         {
@@ -13,40 +14,78 @@ namespace Weariness.Util
         }
         
         [SerializeField] private float baseValue;
-        [SerializeField] private List<StatModifier> modifierList = new List<StatModifier>();
+        [NonSerialized] private float cachedValue; // 캐싱된 최종 값
+        [SerializeField] private List<StatModifier> modifierContainer = new ();
+        
+        // 최초 1회만 사용
+        [NonSerialized] private bool isDirty = true; // 값이 변경되었는지 여부
+        
+        [NonSerialized] private bool isDisposed = false;
+        
+        public float BaseValue
+        {
+            get => baseValue;
+            set
+            {
+                baseValue = value;
+                cachedValue = GetValue();
+            }
+        }
 
         public float Value
         {
-            get => GetValue();
-            set => baseValue = value;
+            get
+            {
+                if(isDirty == false) 
+                    cachedValue = GetValue();
+                return cachedValue;
+            }
         }
-        
+
         public Stat(float baseValue = default)
         {
             this.baseValue = baseValue;
+            cachedValue = GetValue();
+        }
+
+        ~Stat()
+        {
+            Dispose();
         }
 
         public void AddModifier(StatModifier modifier)
         {
-            modifierList.Add(modifier);
+            modifierContainer.Add(modifier);
+            modifier.AddRefStat(this);
+            cachedValue = GetValue();
         }
 
         public void RemoveModifier(StatModifier modifier)
         {
-            modifierList.Remove(modifier);
+            modifierContainer.Remove(modifier);
+            modifier.RemoveRefStat(this);
+            cachedValue = GetValue();
         }
 
         private float GetValue()
         {
+            isDirty = true;
+            
             float finalValue = baseValue;
             float percentAdd = 0f;
 
-            foreach (var mod in modifierList)
+            foreach (var mod in modifierContainer)
             {
-                if (mod.type == StatModifier.ModifierType.Flat)
-                    finalValue += mod.value;
-                else if (mod.type == StatModifier.ModifierType.Percent)
-                    percentAdd += mod.value;
+                if(mod == null) continue;
+                switch (mod.type)
+                {
+                    case StatModifier.ModifierType.Flat:
+                        finalValue += mod.value;
+                        break;
+                    case StatModifier.ModifierType.Percent:
+                        percentAdd += mod.value;
+                        break;
+                }
             }
 
             finalValue *= (1 + percentAdd);
@@ -56,6 +95,17 @@ namespace Weariness.Util
         public override string ToString()
         {
             return $"Base({baseValue}) Real({Value})";
+        }
+
+        public void Dispose()
+        {
+            if(isDisposed == false)
+            {
+                isDisposed = true;
+                foreach (var mod in modifierContainer)
+                    mod.RemoveRefStat(this);
+                modifierContainer.Clear();
+            }
         }
     }
 
