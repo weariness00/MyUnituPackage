@@ -42,17 +42,19 @@ namespace Weariness.Util
             _max = max;
         }
 
-        public void Clamp(T value)
+        public T Clamp(T value)
         {
             var c = Comparer<T>.Default;
             if (c.Compare(value, _min) < 0)
             {
-                _min = value;
+                return _min;
             }
-            else if (c.Compare(value, _max) > 0)
+            if (c.Compare(value, _max) > 0)
             {
-                _max = value;
+                return _max;
             }
+
+            return value;
         }
     }
 
