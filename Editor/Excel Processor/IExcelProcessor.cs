@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using OfficeOpenXml;
+using ExcelDataReader;
 
 namespace Weariness.Util.CSV.Editor
 {
     public interface IExcelProcessor
     {
-        public string Name { get; set; }
-        public List<string> sheetNames { get; set; }
-        public void Process(ExcelPackage package);
+        public string Name { get; }
+        
+        public string[] GetSheetNames();
+        public void Process(IExcelDataReader reader, string sheetName);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using OfficeOpenXml;
 using UnityEditor;
 using UnityEngine;
 
@@ -36,8 +35,12 @@ namespace Weariness.Util.CSV.Editor
                     if (Path.GetFileNameWithoutExtension(path) == key)
                     {
                         var fullPath = Path.Combine(Application.dataPath, path.Substring("Assets/".Length));
-                        using var package = new ExcelPackage(new FileInfo(fullPath));
-                        value.Process(package);
+                        foreach (var sheetName in value.GetSheetNames())
+                        {
+                            using var reader = fullPath.GetExcelReader();
+                            if(reader.GotoSheet(sheetName) == false) continue;
+                            value.Process(reader, sheetName);
+                        }
                     }
                 }
             }

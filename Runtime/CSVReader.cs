@@ -98,7 +98,7 @@ namespace Weariness.Util.CSV
             return defaultValue;
         }
 
-        public static void Read(this TextAsset csvFile, out List<Dictionary<string, object>> csv)
+        public static void ReadCSV(this TextAsset csvFile, out List<Dictionary<string, object>> csv)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace Weariness.Util.CSV
             }
         }
         
-        public static void Read(this string text, out List<Dictionary<string, object>> csv)
+        public static void ReadCSV(this string text, out List<Dictionary<string, object>> csv)
         {
             try
             {
@@ -125,11 +125,11 @@ namespace Weariness.Util.CSV
             }
         }
         
-        public static void Read<TData>(this string text, out TData[] datas,  Func<TData, TData> onUpdateData = null) where TData : new()
+        public static List<TData> ReadCSV<TData>(this string text,  Func<TData, TData> onUpdateData = null) where TData : new()
         {
             try
             {
-                CSVReader.Read<TData>(text, out datas, onUpdateData);
+                return CSVReader.Read<TData>(text, onUpdateData);
             }
             catch (Exception e)
             {
@@ -145,6 +145,8 @@ namespace Weariness.Util.CSV
         static string LINE_SPLIT_RE = @"(?:\r\n|\n\r|\r)(?=(?:[^""]*""[^""]*"")*[^""]*$)";
         static char[] TRIM_CHARS = { '\"' };
 
+        // Old 함수
+        // List<TData>를 반환하는 Read를 쓰는 것을 권장
         public static void Read(string text, out List<Dictionary<string, object>> list)
         {
             list = new List<Dictionary<string, object>>();
@@ -227,14 +229,12 @@ namespace Weariness.Util.CSV
             }
         }
 
-        public static void Read<TData>(string text, out TData[] datas, Func<TData, TData> onUpdateData) where TData : new()
+        public static List<TData> Read<TData>(string text, Func<TData, TData> onUpdateData) where TData : new()
         {
+            List<TData> datas = new();
             var lines = Regex.Split(text, LINE_SPLIT_RE);
             if (lines.Length <= 1)
-            {
-                datas = Array.Empty<TData>();
-                return;
-            }
+                return datas;
 
             // 초기화
             bool isUpdate = onUpdateData != null;
@@ -244,7 +244,6 @@ namespace Weariness.Util.CSV
 
             // TData의 Field, Property의 데이터를 매핑
             var typeSetters = ReflectionCache.TypeSetters<TData>();
-            List<TData> dataList = new(lines.Length - headerIndex);
             for (var i = headerIndex + 1; i < lines.Length - 1; i++)
             {
                 var lineValues = Regex.Split(lines[i], SPLIT_RE);
@@ -265,10 +264,10 @@ namespace Weariness.Util.CSV
                 }
                 if (isUpdate)
                     data = onUpdateData.Invoke(data);
-                dataList.Add(data);
+                datas.Add(data);
             }
 
-            datas = dataList.ToArray();
+            return datas;
         }
 
         private static (string[] haeders, int headerIndex) FindHeader(string text, string headerName)
@@ -309,6 +308,7 @@ namespace Weariness.Util.CSV
             {
                 value = value.TrimStart(TRIM_CHARS).TrimEnd(TRIM_CHARS).Replace("\\", "");
                 var values = Regex.Split(value, SPLIT_RE);
+                values = values.Where(v => !string.IsNullOrEmpty(v)).ToArray();
                 type = type.GetElementType();
                 objectValue = values;
                 object defaultValue = Array.Empty<string>();
@@ -347,6 +347,7 @@ namespace Weariness.Util.CSV
                 else if (type!.IsEnum)
                 {
                     Array array = Array.CreateInstance(type, values.Length);
+                    var enumValues = Enum.GetValues(type);
                     for (var index = 0; index < values.Length; index++)
                     {
                         if(int.TryParse(values[index], out var i))
@@ -354,7 +355,7 @@ namespace Weariness.Util.CSV
                         else if (Enum.IsDefined(type, values[index]))
                             array.SetValue(Enum.Parse(type, values[index]), index);
                         else
-                            array.SetValue(defaultValue, index);
+                            array.SetValue(enumValues.GetValue(0), index);
                     }
 
                     objectValue = array;

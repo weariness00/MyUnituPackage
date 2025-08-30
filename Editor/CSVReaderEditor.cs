@@ -16,7 +16,7 @@ namespace Weariness.Util.CSV.Editor
                 data = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
             if (data == null) return;
             
-            data.Read(out list);
+            data.ReadCSV(out list);
         }
         
         private static string GetResourcePathToCSV(this TextAsset csvFile)

@@ -2,8 +2,7 @@
     "name": "Weariness.Util.CSV.Excel.Editor",
     "rootNamespace": "Weariness.Util",
     "references": [
-        "Weariness.Util.CSV",
-        "Weariness.Util.CSV.Excel"
+        "Weariness.Util.CSV"
     ],
     "includePlatforms": [
         "Editor"
