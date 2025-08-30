@@ -1,6 +1,4 @@
-﻿// Assets/Editor/CSVImporter.cs
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
 using UnityEditor;

@@ -1,0 +1,21 @@
+{
+    "name": "Weariness.Util.CSV.Excel.Editor",
+    "rootNamespace": "Weariness.Util",
+    "references": [
+        "Weariness.Util.CSV",
+        "Weariness.Util.CSV.Excel"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "INCLUDE_WEARINESS_CSV_EXCEL"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

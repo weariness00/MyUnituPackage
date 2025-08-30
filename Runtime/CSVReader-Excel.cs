@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if INCLUDE_WEARINESS_CSV_EXCEL
+using System;
 using System.Collections.Generic;
 using OfficeOpenXml;
 using UnityEngine;
@@ -84,3 +85,4 @@ namespace Weariness.Util.CSV
         }
     }
 }
+#endif

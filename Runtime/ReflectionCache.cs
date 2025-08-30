@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace Weariness.Util.CSV
 {
