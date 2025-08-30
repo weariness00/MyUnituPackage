@@ -1,8 +1,10 @@
-# [1.1.2]
+# [1.2.0]
 ## 2025-08-30
 ### 추가 사항
+
 ### 수정 사항
-- EPPlus사용하는 스크립트는 INCLUDE_WEARINESS_CSV_EXCEL이 Script Define에 없으면 코드 비활성화
+- ExcelDataReader를 추가하여 기존 EPPlus에서 Android/IOS에서 빌드 안되는 문제점을 수정
+- 기존 EPPlus 기반 Excel 읽기 코드들을 ExcelDataReader 기반으로 수정
+- EPPlus 관련 폴더 복사를 ExcelDataReader 폴더 복사로 변경
+
 ### Bug Fix
-- EPPlus가 복사되지 않는 버그 수정
-- 사용하지 않는 Using CSVHelper 제거

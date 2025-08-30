@@ -83,44 +83,54 @@ public class FieldRow
 
 ---
 
-### 2) CSV Reader — Excel(EPPlus)
+### 2) CSV Reader — Excel(ExcelDataReader)
 
-* **역할**: EPPlus `ExcelWorksheet`를 **CSV 행 형태로 파싱**
+* **역할**: `Excel의 Sheet 정보`를 **CSV 행 형태로 파싱**
 * **핵심 포인트**
 
    * 특정 시트를 선택해 **바로 타입으로 매핑**
    * **시트 → CSV 문자열 Export** 유틸 제공(아래 Convert CSV 참조)
 
 ```csharp
+
 using System;
+using System.Collections.Generic;
 using System.IO;
-using OfficeOpenXml;
 using UnityEngine;
 using Weariness.Util.CSV;
 
-public class CSV_Excel_Example : MonoBehaviour
+namespace Test
 {
-    public string excelPath = "Test/CSV/Test.xlsx";
-    public ExcelRow[] rows;
-
-    void Awake()
+    public class CSV_Excel_Test : MonoBehaviour
     {
-        var pkg = new ExcelPackage(new FileInfo(Path.Combine(Application.dataPath, excelPath)));
-        var sheet = pkg?.Workbook?.Worksheets["A"];
-        rows = CSVReader.ReadToExcelSheet<ExcelRow>(sheet);
+        [Tooltip("무조건 에셋 내부에")] public string excelPath;
+        public List<TestData> datas;
+        
+        public void Awake()
+        {
+            var fileFullPath = Path.Combine(Application.dataPath, excelPath);
+            using var reader = fileFullPath.GetExcelReader();
+            datas = reader.ReadExcel<TestData>("A");
+        }
+    }
+
+    public enum A
+    {
+        A = 0,
+        B = 1,
+    }
+
+    [Serializable]
+    public struct TestData
+    {
+        [CSVColumnName("Int")]public int i;
+        public A[] type;
+        public string av;
     }
 }
-
-public enum A { A = 0, B = 1 }
-
-[Serializable]
-public struct ExcelRow
-{
-    public int av;
-    public A[] ty약
 ```
 
-> 시트 확장 메서드로 `sheet.Read<T>(out var datas)` 형태도 사용 가능합니다.
+> Excel 확장 메서드로 `excelPath.Read<T>(string sheetName)` 형태도 사용 가능합니다.
 
 ---
 
@@ -135,79 +145,74 @@ public struct ExcelRow
    * **키 규칙**: CSV 파일명 ↔ `ICSVProcessor.CSV_Name` 일치
 
 ```csharp
+using System;
 using System.Collections.Generic;
-using OfficeOpenXml;
+using ExcelDataReader;
 using UnityEditor;
 using UnityEngine;
 using Weariness.Util.CSV;
+using Weariness.Util.CSV.Editor;
 
-[InitializeOnLoad]
-public static class CustomProcessorInitializer
+namespace Test
 {
-    static CustomProcessorInitializer()
+    public class ExcelProcessorTest : IExcelProcessor
     {
-        EditorApplication.delayCall += OnEditorLoaded;
-    }
-
-    static void OnEditorLoaded()
-    {
-        var csv = new CSVProcessorTest();
-        if (!CSVPostprocessor.HasProcessor(csv))
-            CSVPostprocessor.AddProcessor(csv);
-
-        var excel = new ExcelProcessorTest();
-        if (!ExcelPostProcessor.HasProcessor(excel))
+        [InitializeOnLoadMethod]
+        private static void ResisterProcessor()
         {
-            excel.sheetNames.Add("A");
-            excel.sheetNames.Add("B");
-            ExcelPostProcessor.AddProcessor(excel);
-        }
-    }
-}
-
-public class CSVProcessorTest : ICSVProcessor
-{
-    public string CSV_Name { get; set; } = "CSV"; // CSV 파일명과 동일
-    public void Process(TextAsset textAsset, string path)
-    {
-        // CSV 후처리 로직
-    }
-}
-
-public class ExcelProcessorTest : IExcelProcessor
-{
-    public string Name { get; set; } = "Test";
-    public List<string> sheetNames { get; set; } = new List<string>();
-
-    public void Process(ExcelPackage package)
-    {
-        foreach (var ws in package.Workbook.Worksheets)
-        {
-            switch (ws.Name)
+            // 여기에 한 번만 실행할 코드
+            if (!ExcelPostProcessor.HasProcessor(ProcessorName))
             {
-                case "A": ASheet(ws); break;
-                case "B": BSheet(ws); break;
+                var excel = new ExcelProcessorTest();
+                ExcelPostProcessor.AddProcessor(excel);
             }
         }
-        Debug.Log("Processing Excel Package");
+
+        private static readonly string ProcessorName = "Test";
+        private static readonly string[] SheetNames = new[]
+        {
+            "A",
+            "B",
+        };
+        public string Name => ProcessorName;
+        public string[] GetSheetNames() => SheetNames;
+
+        public void Process(IExcelDataReader reader, string sheetName)
+        {
+            // Excel 처리 로직
+            var datas = reader.ReadExcel<TestData>(sheetName);
+            Debug.Log(datas.Count);
+            Debug.Log($"Processing {sheetName} Sheet: {datas}");
+            switch (sheetName)
+            {
+                case "A":
+                    ASheet(datas);
+                    break;
+                case "B":
+                    BSheet(datas);
+                    break;
+            }
+            
+            Debug.Log("Processing Excel Package");
+        }
+        
+        private void ASheet(List<TestData> datas)
+        {
+            // A 시트 처리 로직
+        }
+        
+        private void BSheet(List<TestData> datas)
+        {
+            // B 시트 처리 로직
+        }
     }
 
-    void ASheet(ExcelWorksheet sheet)
+    [Serializable]
+    public struct TestData
     {
-        sheet.Read<SheetRow>(out var datas); // 시트 → 타입 매핑
-        Debug.Log(datas.Length);
+        [CSVIgnore] public int INT;
+        [CSVColumnName("int")] public int value;
     }
-
-    void BSheet(ExcelWorksheet sheet)
-    {
-        // B 시트 처리
-    }
-}
-
-public struct SheetRow
-{
-    [CSVIgnore] public int INT;
-    [CSVColumnName("int")] public int value;
 }
 ```
 
@@ -219,20 +224,27 @@ public struct SheetRow
 
 ```csharp
 using System.IO;
-using OfficeOpenXml;
+using TMPro;
 using UnityEngine;
 using Weariness.Util.CSV;
 
-public class ConvertCSV_Example : MonoBehaviour
+namespace Test
 {
-    public string path = "Assets/A.xlsx";
-    public string sheetName = "A Sheet";
-
-    void Start()
+    public class CSVExportTest : MonoBehaviour
     {
-        var pkg = new ExcelPackage(new FileInfo(Path.Combine(Application.dataPath, path)));
-        string csv = ConvertCSV.ExportSheetToCsv(pkg, sheetName);
-        Debug.Log(csv.Substring(0, Mathf.Min(120, csv.Length)) + "...");
+        public string path = "Assets/A.xlsx";
+        public string sheetName = "A";
+
+        public TMP_Text checkText;
+
+        void Start()
+        {
+            var fullPath = Path.Combine(Application.dataPath, path);
+            string csv = ConvertCSV.ExportExcelSheetToCsv(fullPath, sheetName);
+            Debug.Log(csv.Substring(0, Mathf.Min(120, csv.Length)) + "...");
+
+            checkText.text = csv;
+        }
     }
 }
 ```
@@ -241,7 +253,7 @@ public class ConvertCSV_Example : MonoBehaviour
 
 ## 설계 & 아키텍처
 
-* **확장 메서드**로 `TextAsset`, `ExcelWorksheet`에 자연스럽게 붙는 API 제공
+* **확장 메서드**로 `TextAsset`, `IExcelDataReader` 에 자연스럽게 붙는 API 제공
 * **인터페이스 분리**: `ICSVProcessor` / `IExcelProcessor`로 후처리 커스터마이즈
 * **어트리뷰트 세트**: `CSVFieldName`, `CSVColumnName`, `CSVIgnore` 등으로 명시적 제어
 
