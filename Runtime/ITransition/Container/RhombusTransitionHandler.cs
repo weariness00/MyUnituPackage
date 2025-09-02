@@ -120,6 +120,90 @@ namespace Weariness.Transition
 
             originBlocks = blockList.ToArray();
         }
+
+        public IEnumerable<List<(int x, int y)>> GetLayeredIndex(Vector2Int arrIndex, int cx, int cy)
+        {
+            // 시작점 유효성 체크
+            if (cx < 0 || cy < 0 || cx >= arrIndex.x || cy >= arrIndex.y)
+                yield break;
+            if (GetIndex(cx, cy) == -1)
+                yield break;
+            // BFS 준비
+            int maxRadius = int.MaxValue;
+            var visited = new HashSet<(int x, int y)>();
+            var queue = new Queue<(int x, int y, int d)>();
+            var layers = new Dictionary<int, List<(int x, int y)>>();
+
+            visited.Add((cx, cy));
+            queue.Enqueue((cx, cy, 0));
+
+            // 시작 레이어 처리(원하면 포함)
+            layers[0] = new List<(int, int)> { (cx, cy) };
+
+            while (queue.Count > 0)
+            {
+                var (x, y, d) = queue.Dequeue();
+
+                if (d == maxRadius) continue;
+
+                foreach (var (nx, ny) in NeighborCandidatesZigzag(x, y, true))
+                {
+                    // 1) 기본 범위
+                    if (nx < 0 || ny < 0 || nx >= arrIndex.x || ny >= arrIndex.y) continue;
+
+                    // 2) 마름모 지그재그 레이아웃에서 유효한 칸인지
+                    if (GetIndex(nx, ny) == -1) continue;
+
+                    // 3) 방문 체크
+                    if (!visited.Add((nx, ny))) continue;
+
+                    int nd = d + 1;
+                    if (!layers.TryGetValue(nd, out var list))
+                    {
+                        list = new List<(int, int)>();
+                        layers[nd] = list;
+                    }
+                    list.Add((nx, ny));
+
+                    queue.Enqueue((nx, ny, nd));
+                }
+            }
+
+            // 0,1,2... 순서로 레이어 반환
+            int maxD = layers.Count == 0 ? -1 : layers.Keys.Max();
+            for (int i = 0; i <= maxD; i++)
+                if (layers.TryGetValue(i, out var layer))
+                    yield return layer;
+        }
+        
+        // 지그재그(홀짝 행 오프셋)용 이웃 후보 생성
+        private IEnumerable<(int x, int y)> NeighborCandidatesZigzag(int x, int y, bool includeCorners)
+        {
+            bool odd = (y % 2) == 1;
+
+            // 엣지 공유(4이웃)
+            yield return (x, y - 2);
+            yield return (x, y + 2);
+            yield return (x - 1, y);                     // left
+            yield return (x + 1, y);                     // right
+            yield return (odd ? x + 1 : x, y - 1);       // down
+            yield return (odd ? x + 1 : x, y + 1);       // up
+
+            if (includeCorners)
+            {
+                // 꼭짓점 접촉 추가(2이웃)
+                if (odd)
+                {
+                    yield return (x,     y - 1);
+                    yield return (x,     y + 1);
+                }
+                else
+                {
+                    yield return (x - 1, y - 1);
+                    yield return (x - 1, y + 1);
+                }
+            }
+        }
     }
 }
 

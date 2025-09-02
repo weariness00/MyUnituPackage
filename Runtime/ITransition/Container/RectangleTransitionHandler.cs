@@ -106,5 +106,28 @@ namespace Weariness.Transition
 
             originBlocks = blockList.ToArray();
         }
+
+        public IEnumerable<List<(int x, int y)>> GetLayeredIndex(Vector2Int arrIndex, int cx, int cy)
+        {
+            var layers = new Dictionary<int, List<(int x, int y)>>();
+
+            for (int x = 0; x < arrIndex.x; x++)
+            {
+                for (int y = 0; y < arrIndex.y; y++)
+                {
+                    int dist = Math.Abs(x - cx) + Math.Abs(y - cy); // Manhattan distance
+                    if (!layers.ContainsKey(dist))
+                        layers[dist] = new List<(int x, int y)>();
+                    layers[dist].Add((x, y));
+                }
+            }
+
+            int maxDistance = layers.Keys.Max();
+            for (int i = 0; i <= maxDistance; i++)
+            {
+                if (layers.TryGetValue(i, out var layer))
+                    yield return layer;
+            }
+        }
     }
 }

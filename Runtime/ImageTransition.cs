@@ -141,118 +141,62 @@ namespace Weariness.Transition
                 case BlockAnchor.UpperCenter:
                     startX = index.x / 2;
                     startY = index.y;
-                    foreach (var posList in GetLayeredPositions(index, index.x / 2, index.y))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
-
                     break;
                 case BlockAnchor.UpperRight:
-                    foreach (var posList in GetLayeredPositions(index, index.x, index.y))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = index.x;
+                    startY = index.y;
                     break;
 
                 // Middle
                 case BlockAnchor.MiddleLeft:
-                    foreach (var posList in GetLayeredPositions(index, 0, index.y / 2))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = 0;
+                    startY = index.y / 2;
                     break;
                 case BlockAnchor.MiddleCenter:
-                    foreach (var posList in GetLayeredPositions(index, index.x / 2, index.y / 2))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = index.x / 2;
+                    startY = index.y / 2;
                     break;
                 case BlockAnchor.MiddleRight:
-                    foreach (var posList in GetLayeredPositions(index, index.x, index.y / 2))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
-
+                    startX = index.x;
+                    startY = index.y / 2;
                     break;
 
                 // Lower
                 case BlockAnchor.LowerLeft:
-                    foreach (var posList in GetLayeredPositions(index, 0, 0))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = 0;
+                    startY = 0;
                     break;
                 case BlockAnchor.LowerCenter:
-                    foreach (var posList in GetLayeredPositions(index, index.x / 2, 0))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = index.x / 2;
+                    startY = 0;
                     break;
                 case BlockAnchor.LowerRight:
-                    foreach (var posList in GetLayeredPositions(index, index.x, 0))
-                    {
-                        foreach (var (x, y) in posList)
-                        {
-                            var blockIndex = handler.GetIndex(x, y);
-                            if (blockIndex == -1) continue;
-                            UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                            i++;
-                        }
-                    }
+                    startX = index.x;
+                    startY = 0;
                     break;
             }
+
+            if (gridGroupMode == GridGroupMode.AdjacentRegions)
+            {
+                int layerCount = 0;
+                foreach (var posList in handler.GetLayeredIndex(index, startX, startY))
+                    layerCount++;
+                delayInterval = delay / layerCount;
+            }
             
-            foreach (var posList in GetLayeredPositions(index, startX, startY))
+            foreach (var posList in handler.GetLayeredIndex(index, startX, startY))
             {
                 foreach (var (x, y) in posList)
                 {
                     var blockIndex = handler.GetIndex(x, y);
                     if (blockIndex == -1) continue;
                     UpdateBlockAsync(blockIndex, i * delayInterval, token).Forget();
-                    i++;
+                    
+                    if(gridGroupMode == GridGroupMode.Single)
+                        i++;
                 }
+                if(gridGroupMode == GridGroupMode.AdjacentRegions)
+                    i++;
             }
             
             UpdateDrawVerticesAsync(duration + delay, cts.Token).Forget();
@@ -298,32 +242,6 @@ namespace Weariness.Transition
                     originBlocks[blockIndex].vertices[3].color = endData.colorOffset;
                 }
             }
-            
-            IEnumerable<List<(int x, int y)>> GetLayeredPositions(Vector2Int arrIndex, int cx, int cy)
-            {
-                var layers = new Dictionary<int, List<(int x, int y)>>();
-
-                for (int x = 0; x < arrIndex.x; x++)
-                {
-                    for (int y = 0; y < arrIndex.y; y++)
-                    {
-                        int dist = Math.Abs(x - cx) + Math.Abs(y - cy); // Manhattan distance
-                        if (!layers.ContainsKey(dist))
-                            layers[dist] = new List<(int x, int y)>();
-                        layers[dist].Add((x, y));
-                    }
-                }
-
-                // delayInterval = delay / (float)layers.Count;
-
-                int maxDistance = layers.Keys.Max();
-                for (int i = 0; i <= maxDistance; i++)
-                {
-                    if (layers.TryGetValue(i, out var layer))
-                        yield return layer;
-                }
-            }
-        
         }
 
         private async UniTask UpdateDrawVerticesAsync(float duration, CancellationToken token)
