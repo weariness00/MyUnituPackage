@@ -46,5 +46,19 @@ namespace Weariness.Transition
                 colorOffset = c;
             }
         }
+        
+        public enum BlockAnchor
+        {
+            UpperLeft,
+            UpperCenter,
+            UpperRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            LowerLeft,
+            LowerCenter,
+            LowerRight,
+            Random,
+        }
     }
 }
