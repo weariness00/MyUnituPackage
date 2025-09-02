@@ -11,10 +11,11 @@ namespace Weariness.Transition.Editor
     {
         UnityEditor.Editor baseEditor;
 
-        private SerializedProperty normalizedTime;
         private SerializedProperty blockType;
         private SerializedProperty childAlignment;
         private SerializedProperty grid;
+        private SerializedProperty gridGroupModeType;
+        private SerializedProperty easeType;
 
         private void OnEnable()
         {
@@ -23,8 +24,9 @@ namespace Weariness.Transition.Editor
 
             blockType = serializedObject.FindProperty("blockType");
             childAlignment = serializedObject.FindProperty("childAlignment");
-            normalizedTime = serializedObject.FindProperty("normalizedTime");
             grid = serializedObject.FindProperty("grid");
+            gridGroupModeType = serializedObject.FindProperty("gridGroupMode");
+            easeType = serializedObject.FindProperty("ease");
         }
 
         public override void OnInspectorGUI()
@@ -41,8 +43,9 @@ namespace Weariness.Transition.Editor
             GUILayout.Label("Transition Info", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(blockType);
             EditorGUILayout.PropertyField(childAlignment);
-            EditorGUILayout.PropertyField(normalizedTime);
             EditorGUILayout.PropertyField(grid);
+            EditorGUILayout.PropertyField(gridGroupModeType);
+            EditorGUILayout.PropertyField(easeType);
             serializedObject.ApplyModifiedProperties();
         }
     }
