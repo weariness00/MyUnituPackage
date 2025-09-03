@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Weariness.Transition
+namespace Weariness.UI.Transition
 {
     public struct TransitionUIBlock
     {

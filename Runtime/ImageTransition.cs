@@ -1,16 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-namespace Weariness.Transition
+namespace Weariness.UI.Transition
 {
     [RequireComponent(typeof(CanvasRenderer))]
     [AddComponentMenu("UI/Image Transition", 11)]

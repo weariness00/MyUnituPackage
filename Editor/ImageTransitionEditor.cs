@@ -1,10 +1,9 @@
 ﻿using UnityEditor;
 using UnityEditor.UI;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Image = UnityEngine.UI.Image;
 
-namespace Weariness.Transition.Editor
+namespace Weariness.UI.Transition.Editor
 {
     [CustomEditor(typeof(ImageTransition))]
     public class ImageTransitionEditor : UnityEditor.Editor

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Weariness.Transition
+namespace Weariness.UI.Transition
 {
     public partial class ImageTransition
     {

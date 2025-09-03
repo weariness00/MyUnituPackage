@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Weariness.Transition
+namespace Weariness.UI.Transition
 {
     public static class UIVertexExtension
     {

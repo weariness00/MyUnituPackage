@@ -1,4 +1,4 @@
-﻿namespace Weariness.Transition
+﻿namespace Weariness.UI.Transition
 {
     public enum TransitionEase
     {
