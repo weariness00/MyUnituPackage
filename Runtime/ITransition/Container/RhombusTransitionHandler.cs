@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -129,6 +130,8 @@ namespace Weariness.Transition
             if (GetIndex(cx, cy) == -1)
                 yield break;
             // BFS 준비
+            var gridModeInfo = typeof(ImageTransition).GetField("gridGroupMode", BindingFlags.Instance | BindingFlags.NonPublic);
+            var gridMode = (ImageTransition.GridGroupMode)gridModeInfo.GetValue(ImageTransition);
             int maxRadius = int.MaxValue;
             var visited = new HashSet<(int x, int y)>();
             var queue = new Queue<(int x, int y, int d)>();
@@ -146,7 +149,7 @@ namespace Weariness.Transition
 
                 if (d == maxRadius) continue;
 
-                foreach (var (nx, ny) in NeighborCandidatesZigzag(x, y, true))
+                foreach (var (nx, ny) in NeighborCandidatesZigzag(x, y, true, gridMode))
                 {
                     // 1) 기본 범위
                     if (nx < 0 || ny < 0 || nx >= arrIndex.x || ny >= arrIndex.y) continue;
@@ -157,7 +160,22 @@ namespace Weariness.Transition
                     // 3) 방문 체크
                     if (!visited.Add((nx, ny))) continue;
 
-                    int nd = d + 1;
+                    int nd = d;
+                    switch (gridMode)
+                    {
+                        case ImageTransition.GridGroupMode.Single:
+                        case ImageTransition.GridGroupMode.AdjacentRegions:
+                            nd += 1;
+                            break;
+                        case ImageTransition.GridGroupMode.HorizontalLine:
+                            nd += ny == y ? 0 : 1;
+                            break;
+                        case ImageTransition.GridGroupMode.VerticalLine:
+                            nd += (nx == x  && (Math.Abs(ny - y) % 2 == 0))? 0 : 1;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                     if (!layers.TryGetValue(nd, out var list))
                     {
                         list = new List<(int, int)>();
@@ -177,32 +195,68 @@ namespace Weariness.Transition
         }
         
         // 지그재그(홀짝 행 오프셋)용 이웃 후보 생성
-        private IEnumerable<(int x, int y)> NeighborCandidatesZigzag(int x, int y, bool includeCorners)
+        private IEnumerable<(int x, int y)> NeighborCandidatesZigzag(int x, int y, bool includeCorners, ImageTransition.GridGroupMode mode)
         {
             bool odd = (y % 2) == 1;
-
-            // 엣지 공유(4이웃)
-            yield return (x, y - 2);
-            yield return (x, y + 2);
-            yield return (x - 1, y);                     // left
-            yield return (x + 1, y);                     // right
-            yield return (odd ? x + 1 : x, y - 1);       // down
-            yield return (odd ? x + 1 : x, y + 1);       // up
-
-            if (includeCorners)
+            switch (mode)
             {
-                // 꼭짓점 접촉 추가(2이웃)
-                if (odd)
-                {
-                    yield return (x,     y - 1);
-                    yield return (x,     y + 1);
-                }
-                else
-                {
-                    yield return (x - 1, y - 1);
-                    yield return (x - 1, y + 1);
-                }
+                case ImageTransition.GridGroupMode.Single:
+                case ImageTransition.GridGroupMode.AdjacentRegions:
+                    // 엣지 공유(4이웃)
+                    yield return (x, y - 2);
+                    yield return (x, y + 2);
+                    yield return (x - 1, y);                     // left
+                    yield return (x + 1, y);                     // right
+                    yield return (odd ? x + 1 : x, y - 1);       // down
+                    yield return (odd ? x + 1 : x, y + 1);       // up
+                    if (includeCorners)
+                    {
+                        // 꼭짓점 접촉 추가(2이웃)
+                        if (odd)
+                        {
+                            yield return (x,     y - 1);
+                            yield return (x,     y + 1);
+                        }
+                        else
+                        {
+                            yield return (x - 1, y - 1);
+                            yield return (x - 1, y + 1);
+                        }
+                    }
+                    break;
+                case ImageTransition.GridGroupMode.HorizontalLine:
+                    yield return (x - 1, y);                     // left
+                    yield return (x + 1, y);                     // right
+                    yield return (odd ? x + 1 : x, y - 1);       // down
+                    yield return (odd ? x + 1 : x, y + 1);       // up
+                    if (includeCorners)
+                    {
+                        // 꼭짓점 접촉 추가(2이웃)
+                        if (odd)
+                        {
+                            yield return (x,     y - 1);
+                            yield return (x,     y + 1);
+                        }
+                        else
+                        {
+                            yield return (x - 1, y - 1);
+                            yield return (x - 1, y + 1);
+                        }
+                    }
+                    break;
+                case ImageTransition.GridGroupMode.VerticalLine:
+                    yield return (x, y - 2);
+                    yield return (x, y + 2);
+                    yield return (odd ? x + 1 : x, y - 1);       // down
+                    yield return (odd ? x + 1 : x, y + 1);       // up
+                    yield return (!odd ? x - 1 : x, y - 1);
+                    yield return (!odd ? x - 1 : x, y + 1);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -109,13 +110,29 @@ namespace Weariness.Transition
 
         public IEnumerable<List<(int x, int y)>> GetLayeredIndex(Vector2Int arrIndex, int cx, int cy)
         {
+            var gridModeInfo = typeof(ImageTransition).GetField("gridGroupMode", BindingFlags.Instance | BindingFlags.NonPublic);
+            var gridMode = (ImageTransition.GridGroupMode)gridModeInfo.GetValue(ImageTransition);
             var layers = new Dictionary<int, List<(int x, int y)>>();
-
             for (int x = 0; x < arrIndex.x; x++)
             {
                 for (int y = 0; y < arrIndex.y; y++)
                 {
-                    int dist = Math.Abs(x - cx) + Math.Abs(y - cy); // Manhattan distance
+                    int dist = 0;
+                    switch (gridMode)
+                    {
+                        case ImageTransition.GridGroupMode.Single:
+                        case ImageTransition.GridGroupMode.AdjacentRegions:
+                            dist = Math.Abs(x - cx) + Math.Abs(y - cy); // Manhattan distance
+                            break;
+                        case ImageTransition.GridGroupMode.HorizontalLine:
+                            dist = Math.Abs(y - cy);
+                            break;
+                        case ImageTransition.GridGroupMode.VerticalLine:
+                            dist = Math.Abs(x - cx);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                     if (!layers.ContainsKey(dist))
                         layers[dist] = new List<(int x, int y)>();
                     layers[dist].Add((x, y));
@@ -128,6 +145,7 @@ namespace Weariness.Transition
                 if (layers.TryGetValue(i, out var layer))
                     yield return layer;
             }
+            
         }
     }
 }

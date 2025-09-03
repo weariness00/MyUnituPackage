@@ -176,7 +176,7 @@ namespace Weariness.Transition
                     break;
             }
 
-            if (gridGroupMode == GridGroupMode.AdjacentRegions)
+            if(gridGroupMode != GridGroupMode.Single)
             {
                 int layerCount = 0;
                 foreach (var posList in handler.GetLayeredIndex(index, startX, startY))
@@ -195,7 +195,7 @@ namespace Weariness.Transition
                     if(gridGroupMode == GridGroupMode.Single)
                         i++;
                 }
-                if(gridGroupMode == GridGroupMode.AdjacentRegions)
+                if(gridGroupMode != GridGroupMode.Single)
                     i++;
             }
             
