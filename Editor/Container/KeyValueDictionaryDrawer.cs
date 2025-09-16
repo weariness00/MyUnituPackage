@@ -86,8 +86,8 @@ namespace Weariness.Util.Container.Editor
 
                 property.serializedObject.Update();
                 // 예: 값 스왑이 필요할 때
-                SerializedPropertyExtensions.SwapValues(oldKey,newKey);
-                SerializedPropertyExtensions.SwapValues(oldValue,newValue);
+                Extensions.Editor.SerializedPropertyExtensions.SwapValues(oldKey,newKey);
+                Extensions.Editor.SerializedPropertyExtensions.SwapValues(oldValue,newValue);
                 property.serializedObject.ApplyModifiedProperties();
                 
                 // 폴드 상태도 같이 이동
