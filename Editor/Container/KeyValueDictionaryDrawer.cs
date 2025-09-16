@@ -77,8 +77,19 @@ namespace Weariness.Util.Container.Editor
 
             list.onReorderCallbackWithDetails = (l, oldIndex, newIndex) =>
             {
-                MoveArrayElement(valuesProp, oldIndex, newIndex);
+                var oldKey = keysProp.GetArrayElementAtIndex(oldIndex);
+                var oldValue = valuesProp.GetArrayElementAtIndex(oldIndex);
 
+                var newKey = keysProp.GetArrayElementAtIndex(newIndex);
+                var newValue = valuesProp.GetArrayElementAtIndex(newIndex);
+                
+
+                property.serializedObject.Update();
+                // 예: 값 스왑이 필요할 때
+                SerializedPropertyExtensions.SwapValues(oldKey,newKey);
+                SerializedPropertyExtensions.SwapValues(oldValue,newValue);
+                property.serializedObject.ApplyModifiedProperties();
+                
                 // 폴드 상태도 같이 이동
                 var folds = EnsureElemFoldouts(property, keysProp.arraySize);
                 if (oldIndex >= 0 && oldIndex < folds.Count && newIndex >= 0 && newIndex < folds.Count)
@@ -97,6 +108,8 @@ namespace Weariness.Util.Container.Editor
 
                     folds[newIndex] = temp;
                 }
+                
+                property.serializedObject.ApplyModifiedProperties();
             };
 
             list.elementHeightCallback = index =>
@@ -168,6 +181,7 @@ namespace Weariness.Util.Container.Editor
                 EditorGUI.PropertyField(valRect, valElem, new GUIContent("Value"), true);
 
                 EditorGUIUtility.labelWidth = labelWidthBackup;
+                property.serializedObject.ApplyModifiedProperties();
             };
 
             _lists[property.propertyPath] = list;
@@ -186,7 +200,7 @@ namespace Weariness.Util.Container.Editor
             while (folds.Count > size) folds.RemoveAt(folds.Count - 1);
             return folds;
         }
-
+        
         private string GetInlinePreview(SerializedProperty prop)
         {
             // 간단 프리뷰: 프리미티브/문자열/객체 이름 등
