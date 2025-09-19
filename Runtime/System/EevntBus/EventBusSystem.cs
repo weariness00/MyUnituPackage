@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace Weariness.Util
 {
@@ -11,6 +12,14 @@ namespace Weariness.Util
         {
             eventHandler = new();
         }
+
+#if UNITY_EDITOR
+        [InitializeOnEnterPlayMode]
+        static void EditorInit()
+        {
+            eventHandler.Clear();
+        }
+#endif
         
         public static void Subscribe<T>(TEnum type, Action<T> action)
         {
