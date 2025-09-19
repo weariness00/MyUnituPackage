@@ -9,7 +9,7 @@ namespace Weariness.Util
     public static class PoolSystem
     {
 #if UNITY_EDITOR
-        [InitializeOnLoadMethod]
+        [InitializeOnEnterPlayMode]
         static void EditorInitPool()
         {
             foreach (var (key, target) in pools)
@@ -34,7 +34,23 @@ namespace Weariness.Util
         }
         
         private static readonly Dictionary<GameObject, GameObjectPooling> pools = new();
+        
+        public static GameObject Get(GameObject target)
+        {
+            if (target != null)
+            {
+                if (!pools.TryGetValue(target, out var pooling))
+                {
+                    pooling = new(target);
+                    pools.Add(target, pooling);
+                }
 
+                return pooling.pool.Get();
+            }
+
+            return null;
+        }
+        
         public static T Get<T>(T target) where T : Object
         {
             var go = target.GameObject();
@@ -47,7 +63,7 @@ namespace Weariness.Util
                 }
 
                 var obj = pooling.pool.Get();
-                
+
                 return obj.GetComponent<T>();
             }
 
