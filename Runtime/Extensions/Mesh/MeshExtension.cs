@@ -56,14 +56,18 @@ namespace Weariness.Util.Extensions
                 verticesLabelJob.Schedule().Complete();
                 
                 // 라벨링 정렬
-                var sortLabels = new NativeArray<NativeList<int>>(labelCount[0], Allocator.TempJob);
+                var bucketCount = labelCount[0] + 1; // 라벨이 1..labelCount 이므로 +1(0은 비워둠)
+                var sortLabels = new NativeArray<NativeList<int>>(bucketCount, Allocator.TempJob);
+                for (int i = 0; i < bucketCount; i++)
+                    sortLabels[i] = new NativeList<int>(Allocator.TempJob);
+
                 var labelSortJob = new VerticesLabelSortJob
                 {
                     sortLabels = sortLabels,
                     labelArray = labels
                 };
                 
-                labelSortJob.Schedule(labelCount[0], 32).Complete();
+                labelSortJob.Schedule(mesh.vertexCount, 64).Complete();
                 
                 // 라벨링을 통해 분리된 메쉬를 유클리드 거리를 통해 가까운 것들은 그래프에 정점을 연결
                 var adjacencyList = new NativeArray<NativeArray<NativeList<int>>>(labelCount[0], Allocator.TempJob);
@@ -74,6 +78,7 @@ namespace Weariness.Util.Extensions
                     vertices = vertices
                 };
                 connectBridgeJob.Schedule(labelCount[0], 32).Complete();
+                
                 
                 // 컴포넌트 간의 인접 리스트를 병합
                 var mergeJob = new ComponentAdjacencyMergeJob
