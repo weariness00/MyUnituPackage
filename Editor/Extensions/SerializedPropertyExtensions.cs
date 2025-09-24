@@ -73,7 +73,7 @@ namespace Weariness.Util.Extensions.Editor
             b.serializedObject.Update();
 
             // 1) boxedValue가 가능한 경우(신형 경로)
-#if UNITY_2021_3_OR_NEWER
+#if UNITY_2022_1_OR_NEWER
             if (CanUseBoxedValue(a) && CanUseBoxedValue(b))
             {
                 (a.boxedValue, b.boxedValue) = (b.boxedValue, a.boxedValue);
