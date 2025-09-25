@@ -103,7 +103,7 @@ namespace Weariness.Util.Extensions.Editor
                 return;
             }
 
-#if UNITY_2021_3_OR_NEWER
+#if UNITY_2022_1_OR_NEWER
             if (CanUseBoxedValue(dst) && CanUseBoxedValue(src))
             {
                 dst.boxedValue = src.boxedValue;
@@ -238,7 +238,6 @@ namespace Weariness.Util.Extensions.Editor
             }
         }
 
-#if UNITY_2021_3_OR_NEWER
         private static bool CanUseBoxedValue(SerializedProperty p)
         {
             // array 요소/Generic 루트는 boxedValue가 제한적이므로 안전하게 필터링
@@ -246,6 +245,5 @@ namespace Weariness.Util.Extensions.Editor
             // 대부분의 Leaf/Struct에서 boxedValue 동작(SerializeReference 포함)
             return true;
         }
-#endif
     }
 }
