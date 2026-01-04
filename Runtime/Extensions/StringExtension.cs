@@ -148,5 +148,25 @@ namespace Weariness.Util.Extensions
         public static string RemoveSpriteTagWhere(this string str, Func<string, bool> condition) => PatternRemoveWhere(spriteRegex.Matches(str), str, condition);
         
         #endregion
+
+        // indentLevel 만큼 탭을 각 줄 앞에 붙인다.
+        // (빈 줄은 그대로 두고 싶으면 preserveEmptyLines=false)
+        public static string IndentWithTabs(this string text, int indentLevel, bool preserveEmptyLines = true)
+        {
+            if (string.IsNullOrEmpty(text) || indentLevel <= 0) return text;
+
+            string indent = new string('\t', indentLevel);
+
+            if (preserveEmptyLines)
+            {
+                // 모든 줄 시작(^)에 indent 추가
+                return Regex.Replace(text, @"^", indent, RegexOptions.Multiline);
+            }
+            else
+            {
+                // 빈 줄은 제외하고 indent 추가
+                return Regex.Replace(text, @"^(?!\r?$)", indent, RegexOptions.Multiline);
+            }
+        }
     }
 }
