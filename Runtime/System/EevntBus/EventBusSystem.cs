@@ -17,6 +17,17 @@ namespace Weariness.Util
             eventHandler.Clear();
         }
         
+        public static void Subscribe(TEnum type, Action action)
+        {
+            if (!eventHandler.TryGetValue(type, out var container))
+            {
+                container = new();
+                eventHandler[type] = container;
+            }
+
+            container.Add(action);
+        }
+        
         public static void Subscribe<T>(TEnum type, Action<T> action)
         {
             if (!eventHandler.TryGetValue(type, out var container))
@@ -26,6 +37,14 @@ namespace Weariness.Util
             }
 
             container.Add(action);
+        }
+        
+        public static void Unsubscribe(TEnum type, Action action)
+        {
+            if (eventHandler.TryGetValue(type, out var container))
+            {
+                container.Remove(action);
+            }
         }
         
         public static void Unsubscribe<T>(TEnum type, Action<T> action)
@@ -46,7 +65,17 @@ namespace Weariness.Util
                     {
                         action.Invoke(data);
                     }
-                    else if (del is Action actionNoData)
+                }
+            }
+        }
+        
+        public static void Publish(TEnum type)
+        {
+            if (eventHandler.TryGetValue(type, out var container))
+            {
+                foreach (var del in container)
+                {
+                    if (del is Action actionNoData)
                     {
                         actionNoData.Invoke();
                     }
