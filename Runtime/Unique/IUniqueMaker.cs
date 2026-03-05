@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using UnityEngine;
 
 namespace Weariness.Util

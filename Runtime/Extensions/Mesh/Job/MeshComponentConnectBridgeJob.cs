@@ -21,7 +21,7 @@ namespace Weariness.Util.Extensions
             for (int i = 0; i < sortLabel.Length; i++)
             {
                 if (i == index) continue;
-                var setB = sortLabel[index + 1];
+                var setB = sortLabel[i];
 
                 foreach (var a in setA)
                 foreach (var b in setB)
@@ -62,7 +62,7 @@ namespace Weariness.Util.Extensions
                 {
                     for (int j = 0; j < adjacency[i].Length; j++)
                     {
-                        resultAdjacency[i].Add(j);
+                        resultAdjacency[i].Add(adjacency[i][j]);
                     }
                 }
             }

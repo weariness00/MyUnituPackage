@@ -105,8 +105,8 @@ namespace Weariness.Util.Managers
                     }
                 }
 
-                if(coroutines.Count < coroutineIndex)
-                    coroutines.Remove(coroutines[coroutineIndex]);
+                if (coroutines.Count > coroutineIndex)
+                    coroutines.RemoveAt(coroutineIndex);
             }
         }
     }

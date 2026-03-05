@@ -12,86 +12,123 @@ namespace Weariness.Util.Extensions
             // 해당 선분에 제일 가까운 정점과 제일 먼 정점을 찾는다.
             var result = new NativeArray<int>(2, Allocator.TempJob);
             var vertices = new NativeArray<Vector3>(mesh.vertices, Allocator.TempJob);
-            var findNearAndFarVertexJob = new FindNearAndFarVertexJob()
-            {
-                resultIndices = result,
-                vertices = vertices,
-                origin = origin,
-                direction = direction.normalized,
-                maxDistance = maxDistance,
-                threshold = threshold
-            };
-            
-            findNearAndFarVertexJob.Schedule().Complete();
-            
-            // A 정점에서 B 정점까지의 지오데식 거리를 구한다.
             var adjacency = mesh.CreateAdjacencyGraph(Allocator.TempJob);
             var distance = new NativeArray<float>(1, Allocator.TempJob);
-            var pathFindJob = new DijkstraJob
+            var outPath = new NativeList<int>(Allocator.TempJob);
+
+            try
             {
-                vertices = vertices,
-                adjacency = adjacency,
-                startIndex = result[0],
-                endIndex = result[1],
-                outPath = new NativeList<int>(Allocator.TempJob),
-                outDistance = distance,
-            };
-            pathFindJob.Schedule().Complete();
-            
-            // 두 정점 사이의 지오데식 거리를 구하지 못했다면
-            if (distance[0] == float.MaxValue)
-            {
-                // 라벨링 작업을 수행하여 메쉬들이 붙어 있지 않고 나누어져 있는 것을 구분한다.
-                var labels = new NativeArray<int>(mesh.vertexCount, Allocator.TempJob);
-                var labelCount = new NativeArray<int>(1, Allocator.TempJob);
-                var verticesLabelJob = new VerticesLabelingJob
+                var findNearAndFarVertexJob = new FindNearAndFarVertexJob()
                 {
+                    resultIndices = result,
+                    vertices = vertices,
+                    origin = origin,
+                    direction = direction.normalized,
+                    maxDistance = maxDistance,
+                    threshold = threshold
+                };
+                findNearAndFarVertexJob.Schedule().Complete();
+
+                // A 정점에서 B 정점까지의 지오데식 거리를 구한다.
+                var pathFindJob = new DijkstraJob
+                {
+                    vertices = vertices,
                     adjacency = adjacency,
-                    labelArray = labels,
-                    labelsCount = labelCount,
+                    startIndex = result[0],
+                    endIndex = result[1],
+                    outPath = outPath,
+                    outDistance = distance,
+                };
+                pathFindJob.Schedule().Complete();
 
-                    vertexCount = mesh.vertexCount,
-                };
-                
-                verticesLabelJob.Schedule().Complete();
-                
-                // 라벨링 정렬
-                var bucketCount = labelCount[0] + 1; // 라벨이 1..labelCount 이므로 +1(0은 비워둠)
-                var sortLabels = new NativeArray<NativeList<int>>(bucketCount, Allocator.TempJob);
-                for (int i = 0; i < bucketCount; i++)
-                    sortLabels[i] = new NativeList<int>(Allocator.TempJob);
+                // 두 정점 사이의 지오데식 거리를 구하지 못했다면
+                if (distance[0] == float.MaxValue)
+                {
+                    // 라벨링 작업을 수행하여 메쉬들이 붙어 있지 않고 나누어져 있는 것을 구분한다.
+                    var labels = new NativeArray<int>(mesh.vertexCount, Allocator.TempJob);
+                    var labelCount = new NativeArray<int>(1, Allocator.TempJob);
+                    try
+                    {
+                        var verticesLabelJob = new VerticesLabelingJob
+                        {
+                            adjacency = adjacency,
+                            labelArray = labels,
+                            labelsCount = labelCount,
+                            vertexCount = mesh.vertexCount,
+                        };
+                        verticesLabelJob.Schedule().Complete();
 
-                var labelSortJob = new VerticesLabelSortJob
-                {
-                    sortLabels = sortLabels,
-                    labelArray = labels
-                };
-                
-                labelSortJob.Schedule(mesh.vertexCount, 64).Complete();
-                
-                // 라벨링을 통해 분리된 메쉬를 유클리드 거리를 통해 가까운 것들은 그래프에 정점을 연결
-                var adjacencyList = new NativeArray<NativeArray<NativeList<int>>>(labelCount[0], Allocator.TempJob);
-                var connectBridgeJob = new MeshComponentConnectBridgeJob
-                {
-                    adjacencyList = adjacencyList,
-                    sortLabel = sortLabels,
-                    vertices = vertices
-                };
-                connectBridgeJob.Schedule(labelCount[0], 32).Complete();
-                
-                
-                // 컴포넌트 간의 인접 리스트를 병합
-                var mergeJob = new ComponentAdjacencyMergeJob
-                {
-                    resultAdjacency = adjacency,
-                    adjacencyList = adjacencyList
-                };
-                mergeJob.Schedule().Complete();
+                        // 라벨링 정렬
+                        var bucketCount = labelCount[0] + 1; // 라벨이 1..labelCount 이므로 +1(0은 비워둠)
+                        var sortLabels = new NativeArray<NativeList<int>>(bucketCount, Allocator.TempJob);
+                        try
+                        {
+                            for (int i = 0; i < bucketCount; i++)
+                                sortLabels[i] = new NativeList<int>(Allocator.TempJob);
+
+                            var labelSortJob = new VerticesLabelSortJob
+                            {
+                                sortLabels = sortLabels,
+                                labelArray = labels
+                            };
+                            labelSortJob.Schedule(mesh.vertexCount, 64).Complete();
+
+                            // 라벨링을 통해 분리된 메쉬를 유클리드 거리를 통해 가까운 것들은 그래프에 정점을 연결
+                            var adjacencyList = new NativeArray<NativeArray<NativeList<int>>>(labelCount[0], Allocator.TempJob);
+                            try
+                            {
+                                var connectBridgeJob = new MeshComponentConnectBridgeJob
+                                {
+                                    adjacencyList = adjacencyList,
+                                    sortLabel = sortLabels,
+                                    vertices = vertices
+                                };
+                                connectBridgeJob.Schedule(labelCount[0], 32).Complete();
+
+                                // 컴포넌트 간의 인접 리스트를 병합
+                                var mergeJob = new ComponentAdjacencyMergeJob
+                                {
+                                    resultAdjacency = adjacency,
+                                    adjacencyList = adjacencyList
+                                };
+                                mergeJob.Schedule().Complete();
+                            }
+                            finally
+                            {
+                                for (int i = 0; i < adjacencyList.Length; i++)
+                                    if (adjacencyList[i].IsCreated) adjacencyList[i].Dispose();
+                                adjacencyList.Dispose();
+                            }
+                        }
+                        finally
+                        {
+                            for (int i = 0; i < sortLabels.Length; i++)
+                                if (sortLabels[i].IsCreated) sortLabels[i].Dispose();
+                            sortLabels.Dispose();
+                        }
+                    }
+                    finally
+                    {
+                        labels.Dispose();
+                        labelCount.Dispose();
+                    }
+
+                    pathFindJob.adjacency = adjacency;
+                    pathFindJob.Schedule().Complete();
+                }
+
+                return distance[0];
             }
-
-            pathFindJob.adjacency = adjacency;
-            pathFindJob.Schedule().Complete();
-            return distance[0];
+            finally
+            {
+                result.Dispose();
+                vertices.Dispose();
+                for (int i = 0; i < adjacency.Length; i++)
+                    if (adjacency[i].IsCreated) adjacency[i].Dispose();
+                adjacency.Dispose();
+                distance.Dispose();
+                if (outPath.IsCreated) outPath.Dispose();
+            }
         }
         
         public static NativeArray<NativeList<int>> CreateAdjacencyGraph(this Mesh mesh, Allocator allocator)

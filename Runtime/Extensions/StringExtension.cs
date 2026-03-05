@@ -41,7 +41,7 @@ namespace Weariness.Util.Extensions
             }
             sb.Append(str, lastIndex, str.Length - lastIndex);     // 마지막 남은 문자열
 
-            return str;
+            return sb.ToString();
         }
         
         /// <summary>

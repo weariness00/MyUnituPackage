@@ -76,7 +76,7 @@ namespace Weariness.Util
             if (isIncludeLeft && isIncludeRight)
                 return range.Min <= value && value <= range.Max;
             else if (isIncludeLeft)
-                return range.Min <= value && value <= range.Max;
+                return range.Min <= value && value < range.Max;
             else if (isIncludeRight)
                 return range.Min < value && value <= range.Max;
             else
@@ -102,7 +102,7 @@ namespace Weariness.Util
             if (isIncludeLeft && isIncludeRight)
                 return range.Min <= value && value <= range.Max;
             else if (isIncludeLeft)
-                return range.Min <= value && value <= range.Max;
+                return range.Min <= value && value < range.Max;
             else if (isIncludeRight)
                 return range.Min < value && value <= range.Max;
             else
@@ -128,7 +128,7 @@ namespace Weariness.Util
             if (isIncludeLeft && isIncludeRight)
                 return range.Min <= value && value <= range.Max;
             else if (isIncludeLeft)
-                return range.Min <= value && value <= range.Max;
+                return range.Min <= value && value < range.Max;
             else if (isIncludeRight)
                 return range.Min < value && value <= range.Max;
             else
@@ -155,7 +155,7 @@ namespace Weariness.Util
             if (isIncludeLeft && isIncludeRight)
                 return range.Min <= value && value <= range.Max;
             else if (isIncludeLeft)
-                return range.Min <= value && value <= range.Max;
+                return range.Min <= value && value < range.Max;
             else if (isIncludeRight)
                 return range.Min < value && value <= range.Max;
             else
