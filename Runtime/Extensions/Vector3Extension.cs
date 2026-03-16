@@ -4,6 +4,15 @@ namespace Weariness.Util.Extensions
 {
     public struct Vector3Extension
     {
+        public static Vector3 Random(Vector3 a, Vector3 b)
+        {
+            return new Vector3(
+                UnityEngine.Random.Range(a.x, b.x),
+                UnityEngine.Random.Range(a.y, b.y),
+                UnityEngine.Random.Range(a.z, b.z)
+                );
+        }
+        
         // 3차 베지어 곡선 계산
         public static Vector3 Cubic(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
         {
