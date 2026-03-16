@@ -18,6 +18,7 @@ Unity 개발에서 자주 쓰이는 유틸리티, 확장 메서드, 컨테이너
 - [Container (컨테이너)](#container)
   - [KeyValueDictionary](#keyvaluedictionary)
   - [Wrapping](#wrapping)
+  - [EnumSerialized\<TEnum\>](#enumserializedtenum)
 - [MinMax / MinMaxValue](#minmax--minmaxvalue)
   - [MinMax\<T\>](#minmaxt)
   - [MinMaxValue\<T\>](#minmaxvaluet)
@@ -215,6 +216,29 @@ foreach (var (key, value) in scoreTable)
 [SerializeField]
 private List<Wrapping<MyData>> dataList;
 ```
+
+---
+
+### EnumSerialized\<TEnum\>
+
+`namespace Weariness.Util.Container`
+
+Inspector에서 Enum을 직렬화할 때 **enum 순서(index)가 바뀌어도 값이 유지**되도록 보장하는 구조체.
+
+Unity 기본 Enum 직렬화는 index 값으로 저장하기 때문에, enum 항목의 순서를 바꾸거나 중간에 항목을 추가하면 저장된 값이 의도치 않게 바뀝니다. `EnumSerialized<TEnum>`은 이름(string)을 함께 저장해 이 문제를 해결합니다.
+
+```csharp
+[SerializeField]
+private EnumSerialized<MyEnum> myValue;
+
+// TEnum으로 암묵적 변환
+MyEnum val = myValue;
+
+// TEnum에서 암묵적 변환
+myValue = MyEnum.SomeValue;
+```
+
+**주의:** enum 항목의 **이름을 바꾸면** 복원 불가 (이름 기반이므로 리네임 시 에러 로그 출력).
 
 ---
 
@@ -699,7 +723,7 @@ identifier.target = poolingInstance;
 |--------------|-----------|
 | `Weariness.Util` | Stat, Unique, EventBus, Pool, Singleton, DataPrefs, ObjectGrid, MinMax, MinMaxValue |
 | `Weariness.Util.Extensions` | Math, String, Color, Transform, Vector3, Mesh 확장 메서드 |
-| `Weariness.Util.Container` | KeyValueDictionary, Wrapping |
+| `Weariness.Util.Container` | KeyValueDictionary, Wrapping, EnumSerialized |
 | `Weariness.Util.Managers` | CoroutineManager |
 | `Weariness.Util.UI` | UIScaler |
 | `Weariness.Util.Mobile` | SafeAreaApplier |
