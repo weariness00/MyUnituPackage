@@ -16,7 +16,6 @@ namespace Weariness.Util
         [SerializeField] private float baseValue;
         [NonSerialized] private float cachedValue; // 캐싱된 최종 값
         [SerializeField] private List<StatModifier> modifierContainer = new (); // 스탯이 소지한 다른 Modifier들
-        
         // 스탯 자체를 다른 스탯의 수정자로 사용하고 싶을때 사용
         // 런타임 전용
         [NonSerialized] private Dictionary<StatModifier.ModifierType, StatModifier> modifiers = new(); 

@@ -16,10 +16,14 @@ namespace Weariness.Util.Editor
 
         // 그룹별 펼침 상태 저장: "<propertyPath>/group:i" -> bool
         private readonly Dictionary<string, bool> _groupExpanded = new();
+        // 코드 필드 매핑: arrayIndex -> fieldName (필드당 최초 1회만 매핑)
+        private readonly Dictionary<int, string> _codeFieldMap = new();
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var baseValueProp = property.FindPropertyRelative(ValueKey);
             var modifiersProp = property.FindPropertyRelative(ModifierContainerKey);
+
+            BuildCodeFieldMap(modifiersProp, property.GetTargetObjectOfProperty());
 
             float lineH = EditorGUIUtility.singleLineHeight;
             float spacing = 6f;
@@ -73,8 +77,8 @@ namespace Weariness.Util.Editor
             {
                 var firstElem = modifiersProp.GetArrayElementAtIndex(0);
                 var typeProp = firstElem.FindPropertyRelative("type");
-                enumNames = typeProp.enumDisplayNames;
-                enumCount = enumNames?.Length ?? 0;
+                enumNames = typeProp.enumNames ?? Enum.GetNames(typeof(StatModifier.ModifierType));
+                enumCount = enumNames.Length;
             }
             else
             {
@@ -107,16 +111,33 @@ namespace Weariness.Util.Editor
 
                 var enumName = enumNames[gi];
 
-                // 합계 표시는 요소가 없으면 0으로
-                float propSum = 0f;
-                foreach (var idx in groupIndices)
+                bool isPercentAdditive = enumName == StatModifier.ModifierType.PercentAdditive.ToString();
+                bool isPercentMultiply = enumName == StatModifier.ModifierType.PercentMultiply.ToString();
+
+                string summaryStr;
+                if (isPercentAdditive)
                 {
-                    var e = modifiersProp.GetArrayElementAtIndex(idx);
-                    propSum += e.FindPropertyRelative("value").floatValue;
+                    float sum = 0f;
+                    foreach (var idx in groupIndices)
+                        sum += modifiersProp.GetArrayElementAtIndex(idx).FindPropertyRelative("value").floatValue;
+                    summaryStr = $"+{sum * 100f:F2}%";
+                }
+                else if (isPercentMultiply)
+                {
+                    float compound = 1f;
+                    foreach (var idx in groupIndices)
+                        compound *= 1f + modifiersProp.GetArrayElementAtIndex(idx).FindPropertyRelative("value").floatValue;
+                    summaryStr = $"×{compound * 100f:F2}%";
+                }
+                else
+                {
+                    float sum = 0f;
+                    foreach (var idx in groupIndices)
+                        sum += modifiersProp.GetArrayElementAtIndex(idx).FindPropertyRelative("value").floatValue;
+                    summaryStr = $"+{sum:F4}";
                 }
 
-                bool isPercent = enumName == StatModifier.ModifierType.Percent.ToString();
-                string headerLabel = $"{enumName} ({groupIndices.Count}), Sum({propSum * (isPercent ? 100 : 1)}{(isPercent ? "%" : "")})";
+                string headerLabel = $"{enumName} ({groupIndices.Count}), {summaryStr}";
 
                 Rect labelR = new Rect(arrowRect.xMax + 2f, headerRect.y, headerRect.width - arrowWidth - 50f, lineH);
                 EditorGUI.LabelField(labelR, headerLabel, EditorStyles.boldLabel);
@@ -127,10 +148,11 @@ namespace Weariness.Util.Editor
                 {
                     int newIndex = modifiersProp.arraySize;
                     modifiersProp.arraySize++;
-                    modifiersProp.serializedObject.ApplyModifiedProperties();
 
                     var newElem = modifiersProp.GetArrayElementAtIndex(newIndex);
                     newElem.FindPropertyRelative("type").enumValueIndex = gi;
+                    newElem.FindPropertyRelative("value").floatValue = 0f;
+                    newElem.FindPropertyRelative("isActive").boolValue = false;
                     modifiersProp.serializedObject.ApplyModifiedProperties();
 
                     _groupExpanded[gKey] = true;
@@ -147,20 +169,68 @@ namespace Weariness.Util.Editor
                         var elem = modifiersProp.GetArrayElementAtIndex(realIndex);
 
                         float elemH = EditorGUI.GetPropertyHeight(elem, true);
-                        Rect elemRect = new Rect(x, y, w - 18f, elemH);
-                        EditorGUI.PropertyField(elemRect, elem, true);
+                        _codeFieldMap.TryGetValue(realIndex, out string fieldName);
+                        bool isFromCode = fieldName != null;
 
-                        Rect delRect = new Rect(elemRect.xMax, elemRect.y, 18f, lineH);
-                        if (GUI.Button(delRect, "x"))
+                        Rect elemRect = new Rect(x, y, w - (isFromCode ? 0f : 18f), elemH);
+
+                        if (isFromCode)
                         {
-                            modifiersProp.DeleteArrayElementAtIndex(realIndex);
-                            modifiersProp.serializedObject.ApplyModifiedProperties();
-                            break;
+                            using (new EditorGUI.DisabledScope(true))
+                                EditorGUI.PropertyField(elemRect, elem, new GUIContent(fieldName), true);
+                        }
+                        else
+                        {
+                            EditorGUI.PropertyField(elemRect, elem, new GUIContent($"Modifier"), true);
+
+                            Rect delRect = new Rect(elemRect.xMax, elemRect.y, 18f, lineH);
+                            if (GUI.Button(delRect, "x"))
+                            {
+                                modifiersProp.DeleteArrayElementAtIndex(realIndex);
+                                modifiersProp.serializedObject.ApplyModifiedProperties();
+                                break;
+                            }
                         }
 
                         y += elemH + 2f;
                     }
                 }
+            }
+        }
+
+        // 코드 정의 StatModifier 필드와 배열 인덱스를 레퍼런스 비교로 매핑
+        private static readonly FieldInfo ContainerFieldInfo =
+            typeof(Stat).GetField("modifierContainer", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private void BuildCodeFieldMap(SerializedProperty containerProp, object statObj)
+        {
+            _codeFieldMap.Clear();
+            if (containerProp == null || statObj == null) return;
+
+            // 실제 List<StatModifier> 가져오기
+            var container = ContainerFieldInfo?.GetValue(statObj) as List<StatModifier>;
+            if (container == null || container.Count == 0) return;
+
+            // MonoBehaviour 위의 named StatModifier 필드를 레퍼런스 → 필드명으로 수집
+            var so = containerProp.serializedObject;
+            var namedRefs = new Dictionary<StatModifier, string>();
+            var targetType = so.targetObject.GetType();
+            while (targetType != null && targetType != typeof(UnityEngine.Object))
+            {
+                foreach (var field in targetType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    if (field.FieldType != typeof(StatModifier)) continue;
+                    if (field.GetValue(so.targetObject) is StatModifier mod && !namedRefs.ContainsKey(mod))
+                        namedRefs[mod] = field.Name;
+                }
+                targetType = targetType.BaseType;
+            }
+
+            // 리스트 요소와 named 필드를 레퍼런스로 1:1 매핑
+            for (int i = 0; i < container.Count && i < containerProp.arraySize; i++)
+            {
+                if (container[i] != null && namedRefs.TryGetValue(container[i], out string fieldName))
+                    _codeFieldMap[i] = fieldName;
             }
         }
 
