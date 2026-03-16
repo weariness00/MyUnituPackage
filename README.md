@@ -278,17 +278,29 @@ int value = hp; // hp.Current
 
 게임 스탯 시스템. BaseValue에 Modifier를 누적 적용해 최종 Value를 산출합니다.
 
-**계산 공식:** `finalValue = (baseValue + Flat합계) * (1 + Percent합계)`
+**계산 공식:**
+- `Flat`: `finalValue = baseValue + Flat합계`
+- `PercentAdditive`: `finalValue *= (1 + PercentAdditive합계)` — 모든 퍼센트를 합산한 뒤 한 번 곱셈
+- `PercentMultiply`: `finalValue *= (1 + p1) * (1 + p2) * ...` — 각 퍼센트를 순서대로 개별 곱셈 (복리 방식)
+
+> **적용 순서:** Flat → PercentAdditive → PercentMultiply
 
 ```csharp
 var health = new Stat(100f);
 var damage = new Stat(10f);
 
 var flatMod = new StatModifier(StatModifier.ModifierType.Flat, 20f);
-var percentMod = new StatModifier(StatModifier.ModifierType.Percent, 0.5f);
+var percentAddMod = new StatModifier(StatModifier.ModifierType.PercentAdditive, 0.5f);
+var percentMulMod = new StatModifier(StatModifier.ModifierType.PercentMultiply, 0.2f);
 
-health.AddModifier(flatMod);    // 100 + 20 = 120
-damage.AddModifier(percentMod); // 10 * (1 + 0.5) = 15
+health.AddModifier(flatMod);       // 100 + 20 = 120
+damage.AddModifier(percentAddMod); // 10 * (1 + 0.5) = 15
+
+// PercentMultiply: 각 수정자를 개별적으로 곱함 (복리)
+// base=100, PercentAdditive=0.3, PercentMultiply=0.2, PercentMultiply=0.1
+// → 100 * (1+0.3) * (1+0.2) * (1+0.1) = 171.6
+// PercentAdditive로만 처리했다면: 100 * (1+0.3+0.2+0.1) = 160
+damage.AddModifier(percentMulMod);
 
 Debug.Log(health.Value);  // 120
 Debug.Log(damage.Value);  // 15

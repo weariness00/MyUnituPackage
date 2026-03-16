@@ -78,6 +78,7 @@ namespace Weariness.Util
             
             float finalValue = baseValue;
             float percentAdd = 0f;
+            float percentMul = 1f;
 
 #if UNITY_EDITOR
             modifierContainer ??= new();
@@ -91,13 +92,16 @@ namespace Weariness.Util
                     case StatModifier.ModifierType.Flat:
                         finalValue += mod.Value;
                         break;
-                    case StatModifier.ModifierType.Percent:
+                    case StatModifier.ModifierType.PercentAdditive:
                         percentAdd += mod.Value;
+                        break;
+                    case StatModifier.ModifierType.PercentMultiply:
+                        percentMul *= (1 + mod.Value);
                         break;
                 }
             }
 
-            finalValue *= (1 + percentAdd);
+            finalValue *= (1 + percentAdd) * percentMul;
             
             // Inspector 표시용으로 GetValue를 사용하고 있다.
             // Modifiers는 런타임 전용임으로 Editor에서는 제외

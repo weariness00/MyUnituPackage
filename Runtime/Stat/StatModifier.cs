@@ -7,7 +7,7 @@ namespace Weariness.Util
     [Serializable]
     public partial class StatModifier : IDisposable
     {
-        public enum ModifierType { Flat, Percent }
+        public enum ModifierType { Flat, PercentAdditive, PercentMultiply }
 
         [SerializeField] protected float value = default;
         public ModifierType type;
