@@ -29,6 +29,9 @@ Unity 개발에서 자주 쓰이는 유틸리티, 확장 메서드, 컨테이너
 - [Singleton\<T\>](#singletont)
 - [DataPrefs](#dataprefs)
 - [ObjectGrid](#objectgrid)
+- [Spawner](#spawner)
+  - [ObjectSpawner](#objectspawner)
+  - [ObjectPoolSpawner](#objectpoolspawner)
 - [UI](#ui)
   - [UIScaler](#uiscaler)
   - [SafeAreaApplier](#safeareaapplier)
@@ -510,6 +513,117 @@ GetComponent<ObjectGrid>().ForceUpdate();
 
 ---
 
+## Spawner
+
+`namespace Util`
+
+코루틴 기반으로 오브젝트를 주기적으로 스폰하는 컴포넌트 모음입니다.
+
+---
+
+### ObjectSpawner
+
+`MonoBehaviour`를 상속한 범용 오브젝트 스포너. `GameObject` 외에 제네릭 파라미터로 다른 `UnityEngine.Object` 타입도 지원합니다.
+
+**주요 설정:**
+
+| 프로퍼티 | 설명 |
+|----------|------|
+| `isStartSpawn` | Awake 시점에 자동으로 스폰 시작 여부 |
+| `isEnableSpawn` | 비활성화 → 활성화 시 스폰 재개 여부 |
+| `isLoop` | spawnCount 최대치에 도달해도 계속 스폰할지 여부 |
+| `isPause` | 스폰 일시 중단 |
+| `timeScale` | 스폰 간격에 곱해지는 배율 |
+| `isRandomObject` | 스폰 오브젝트 목록에서 랜덤 선택 여부 |
+| `isRandomPlace` | 스폰 위치 목록에서 랜덤 선택 여부 |
+| `isRandomInterval` | 스폰 간격 목록에서 랜덤 선택 여부 |
+| `parentTransform` | 스폰된 오브젝트의 부모 Transform |
+| `spawnCount` | 현재/최대 스폰 수 (`MinMaxValue<int>`) |
+| `spawnObjectList` | 스폰할 오브젝트 목록 |
+| `spawnObjectOrders` | 스폰 오브젝트 순서 지정 (비어 있으면 순차 반복) |
+| `spawnPlaceType` | 스폰 위치 방식: `Transform` (고정 위치) 또는 `Line` (범위) |
+| `spawnPlaceList` | 스폰 위치 Transform 목록 |
+| `spawnPlaceOrders` | 스폰 위치 순서 지정 |
+| `firstPosition` / `lastPosition` | Line 모드 시 범위 시작/끝 위치 |
+| `spawnIntervals` | 스폰 간격(초) 목록 |
+| `isSameLayer` | 스폰 위치 Transform과 동일한 레이어로 설정 여부 |
+| `onSpawnSuccessAction` | 스폰 성공 시 발생하는 UnityEvent |
+
+**주요 메서드:**
+
+| 메서드 | 설명 |
+|--------|------|
+| `Play(delay)` | 스폰 시작 (선택적 딜레이) |
+| `Stop()` | 스폰 중단 |
+| `Pause()` | 스폰 일시 중단 |
+| `Init()` | 순서 카운터 초기화 및 다음 오브젝트/위치/간격 세팅 |
+| `Spawn()` | 오브젝트 1개 즉시 스폰 (오버라이드 가능) |
+
+```csharp
+// ObjectSpawner 컴포넌트 사용 예시
+var spawner = GetComponent<ObjectSpawner>();
+
+// 0.5초 딜레이 후 스폰 시작
+spawner.Play(0.5f);
+
+// 스폰 성공 시 콜백 등록
+spawner.onSpawnSuccessAction.AddListener(obj =>
+{
+    Debug.Log($"Spawned: {obj.name}");
+});
+
+// 스폰 중단
+spawner.Stop();
+```
+
+**SpawnPlaceType:**
+- `Transform`: `spawnPlaceList`에 등록된 Transform 위치에 순차/랜덤 스폰
+- `Line`: `firstPosition` ~ `lastPosition` 사이 랜덤 위치에 스폰
+
+---
+
+### ObjectPoolSpawner
+
+`ObjectSpawner<TGameObject>`를 상속하며, Unity의 `ObjectPool<T>`를 활용해 오브젝트를 재사용합니다. 프리팹별로 독립적인 풀을 관리합니다.
+
+스폰된 오브젝트에는 `ObjectPoolPrefabIdentifier` 컴포넌트가 자동 부착되어 반환(Release) 시 올바른 풀로 돌아갑니다.
+
+**주요 메서드:**
+
+| 메서드 | 설명 |
+|--------|------|
+| `Release(obj)` | 오브젝트를 풀에 반환 |
+| `OnCreateObject()` | 풀에 오브젝트가 없을 때 새로 생성 (오버라이드 가능) |
+| `OnGetObject(obj)` | 풀에서 꺼낼 때 호출 (추상 메서드, 구현 필요) |
+| `OnReleaseObject(obj)` | 풀에 반환할 때 호출 (추상 메서드, 구현 필요) |
+| `OnDestroyObject(obj)` | 풀 초과 시 파괴할 때 호출 (추상 메서드, 구현 필요) |
+
+비제네릭 `ObjectPoolSpawner`는 GameObject를 대상으로 Get 시 `SetActive(true)`, Release 시 `SetActive(false)`를 기본 동작으로 제공합니다.
+
+```csharp
+// 비제네릭 버전 (GameObject 전용) — Inspector에서 바로 사용 가능
+var spawner = GetComponent<ObjectPoolSpawner>();
+
+spawner.Play();
+
+// 스폰된 오브젝트를 풀에 반환
+spawner.onSpawnSuccessAction.AddListener(obj =>
+{
+    // 일정 시간 후 반환
+    StartCoroutine(ReleaseAfter(spawner, obj, 3f));
+});
+
+IEnumerator ReleaseAfter(ObjectPoolSpawner spawner, GameObject obj, float delay)
+{
+    yield return new WaitForSeconds(delay);
+    spawner.Release(obj);
+}
+```
+
+> `ObjectSpawner`와 달리 `Instantiate` 대신 풀에서 꺼내기 때문에 GC 부담 없이 대량 스폰에 적합합니다.
+
+---
+
 ## UI
 
 ### UIScaler
@@ -577,3 +691,4 @@ identifier.target = poolingInstance;
 | `Weariness.Util.Managers` | CoroutineManager |
 | `Weariness.Util.UI` | UIScaler |
 | `Weariness.Util.Mobile` | SafeAreaApplier |
+| `Util` | ObjectSpawner, ObjectPoolSpawner |
