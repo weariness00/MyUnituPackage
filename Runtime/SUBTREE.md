@@ -16,11 +16,11 @@ git remote add weariness https://github.com/weariness00/MyUnituPackage.git
 
 ## 최신 내용 가져오기 (Subtree Pull)
 
-> 아래 명령은 **이 파일이 있는 폴더(`Weariness/Util`)** 에서 실행하세요.
-> `$(git rev-parse --show-prefix | sed 's|/$||')`가 현재 폴더의 git 루트 기준 상대경로를 자동으로 감지합니다.
+> 아래 명령은 **git 루트(프로젝트 최상위 폴더)** 에서 실행하세요.
+> `find`로 `Weariness/Util` 폴더 위치를 자동 감지하므로 경로가 달라도 동작합니다.
 
 ```bash
-git subtree pull --prefix="$(git rev-parse --show-prefix | sed 's|/$||')" weariness Util --squash
+git subtree pull --prefix="$(find . -type d -path "*/Weariness/Util" | sed 's|^\./||' | head -1)" weariness Util --squash
 ```
 
 > **주의:** 작업 트리에 수정된 파일이 있으면 pull이 실패합니다.
@@ -28,6 +28,6 @@ git subtree pull --prefix="$(git rev-parse --show-prefix | sed 's|/$||')" wearin
 
 ```bash
 git stash
-git subtree pull --prefix="$(git rev-parse --show-prefix | sed 's|/$||')" weariness Util --squash
+git subtree pull --prefix="$(find . -type d -path "*/Weariness/Util" | sed 's|^\./||' | head -1)" weariness Util --squash
 git stash pop
 ```
