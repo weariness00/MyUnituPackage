@@ -54,8 +54,8 @@ namespace Util
     public abstract partial class ObjectPoolSpawner<TGameObject>
     {
         private Dictionary<GameObject, ObjectPool<TGameObject>> poolDictionary = new(); // 오브젝트 pool
-
-        private TGameObject PoolInstantiate()
+        
+        protected TGameObject PoolInstantiate()
         {
             if (!poolDictionary.TryGetValue(_currentSpawnObject.GameObject(),out var pool))
             {
