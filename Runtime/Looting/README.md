@@ -100,18 +100,14 @@ Looting/
 - **Disallow 추첨**: 리스트를 복사한 뒤 뽑힌 항목을 제거하며 반복
 - **비어있거나 totalWeight == 0**: `null` / 빈 리스트 반환
 - **MonoBehaviour 의존 없음**: 순수 C# 클래스. `UnityEngine.Random` 사용
+- **static 클래스**: 인스턴스 상태 없음. `new` 없이 직접 호출
 
 ---
 
-## 외부 주입 방식
+## 사용 방식
 
-`LootingResolver`는 상태를 갖지 않으므로 DI로 싱글턴 주입하거나 직접 `new` 생성 후 사용한다.
+`LootingResolver`는 `static class`이므로 인스턴스 생성 없이 직접 호출한다.
 DataTable → `LootingGroup<T>` / `LootingEntry<T>` 변환은 게임별 구체 구현(예: `TowerLootingBuilder`)에서 담당한다.
-
-```csharp
-// DI 등록 예시
-builder.Register<LootingResolver>(Lifetime.Singleton);
-```
 
 ---
 
@@ -119,16 +115,16 @@ builder.Register<LootingResolver>(Lifetime.Singleton);
 
 ```csharp
 // [그룹 1개 선택 후 단일 추첨] 약탈 구간 보상
-var group  = resolver.PickGroup(sectionGroups);
-var result = resolver.Resolve(group);
+var group  = LootingResolver.PickGroup(sectionGroups);
+var result = LootingResolver.Resolve(group);
 
 // [그룹 N개 선택 후 각각 단일 추첨] 복수 구간 독립시행
-var picked  = resolver.PickGroups(sectionGroups, count: 5, LootingDuplicateMode.Disallow);
-var results = picked.Select(g => resolver.Resolve(g)).ToList();
+var picked  = LootingResolver.PickGroups(sectionGroups, count: 5, LootingDuplicateMode.Disallow);
+var results = picked.Select(g => LootingResolver.Resolve(g)).ToList();
 
 // [N개 중복 허용 추첨]
-var results = resolver.Resolve(group, count: 3, LootingDuplicateMode.Allow);
+var results = LootingResolver.Resolve(group, count: 3, LootingDuplicateMode.Allow);
 
 // [전체 추첨]
-var results = resolver.ResolveAll(group);
+var results = LootingResolver.ResolveAll(group);
 ```

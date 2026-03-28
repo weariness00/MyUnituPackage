@@ -42,14 +42,14 @@ namespace Project.Core
     /// 실제 추첨 실행기. 그룹 추첨과 항목 추첨 두 축으로 구성된다.
     /// DataTable 연동 없는 순수 Core 클래스. MonoBehaviour 의존 없음.
     /// </summary>
-    public class LootingResolver
+    public static class LootingResolver
     {
         // ─── 그룹 추첨 ────────────────────────────────────────────────────
 
         /// <summary>
         /// 여러 그룹 중 SelectionWeight 기반으로 1개 선택하여 반환.
         /// </summary>
-        public LootingGroup<T> PickGroup<T>(List<LootingGroup<T>> groups)
+        public static LootingGroup<T> PickGroup<T>(List<LootingGroup<T>> groups)
         {
             if (groups == null || groups.Count == 0) return null;
             return PickGroupFrom(groups);
@@ -59,7 +59,7 @@ namespace Project.Core
         /// 여러 그룹 중 count개를 SelectionWeight 기반으로 추첨.
         /// Disallow일 때 count가 그룹 수를 초과하면 그룹 수만큼만 반환.
         /// </summary>
-        public List<LootingGroup<T>> PickGroups<T>(
+        public static List<LootingGroup<T>> PickGroups<T>(
             List<LootingGroup<T>> groups,
             int count,
             LootingDuplicateMode duplicateMode)
@@ -94,7 +94,7 @@ namespace Project.Core
         /// <summary>
         /// 모든 그룹을 SelectionWeight 순서 없이 전부 반환 (중복 없음 고정).
         /// </summary>
-        public List<LootingGroup<T>> PickAllGroups<T>(List<LootingGroup<T>> groups)
+        public static List<LootingGroup<T>> PickAllGroups<T>(List<LootingGroup<T>> groups)
         {
             if (groups == null) return new List<LootingGroup<T>>();
             return new List<LootingGroup<T>>(groups);
@@ -105,7 +105,7 @@ namespace Project.Core
         /// <summary>
         /// 그룹 내 항목들 중 Weight 기반으로 1개 선택.
         /// </summary>
-        public LootingResult<T> Resolve<T>(LootingGroup<T> group)
+        public static LootingResult<T> Resolve<T>(LootingGroup<T> group)
         {
             if (group == null || group.EntryList == null || group.EntryList.Count == 0) return null;
 
@@ -120,7 +120,7 @@ namespace Project.Core
         /// 그룹 내에서 count개를 추첨.
         /// Disallow일 때 count가 항목 수를 초과하면 항목 수만큼만 추첨.
         /// </summary>
-        public List<LootingResult<T>> Resolve<T>(
+        public static List<LootingResult<T>> Resolve<T>(
             LootingGroup<T> group,
             int count,
             LootingDuplicateMode duplicateMode)
@@ -156,7 +156,7 @@ namespace Project.Core
         /// 그룹 내 모든 항목을 전부 추첨 (중복 없음 고정).
         /// 각 항목별 Count는 CountMin~CountMax 범위 내에서 결정.
         /// </summary>
-        public List<LootingResult<T>> ResolveAll<T>(LootingGroup<T> group)
+        public static List<LootingResult<T>> ResolveAll<T>(LootingGroup<T> group)
         {
             var result = new List<LootingResult<T>>();
             if (group == null || group.EntryList == null) return result;
@@ -169,7 +169,7 @@ namespace Project.Core
 
         // ─── 내부 헬퍼 ───────────────────────────────────────────────────
 
-        LootingGroup<T> PickGroupFrom<T>(List<LootingGroup<T>> pool)
+        static LootingGroup<T> PickGroupFrom<T>(List<LootingGroup<T>> pool)
         {
             float totalWeight = 0f;
             foreach (var g in pool) totalWeight += g.SelectionWeight;
@@ -185,7 +185,7 @@ namespace Project.Core
             return pool[pool.Count - 1];
         }
 
-        LootingEntry<T> PickEntryFrom<T>(IReadOnlyList<LootingEntry<T>> pool)
+        static LootingEntry<T> PickEntryFrom<T>(IReadOnlyList<LootingEntry<T>> pool)
         {
             float totalWeight = 0f;
             foreach (var e in pool) totalWeight += e.Weight;
@@ -201,7 +201,7 @@ namespace Project.Core
             return pool[pool.Count - 1];
         }
 
-        LootingEntry<T> PickEntryFrom<T>(List<LootingEntry<T>> pool)
+        static LootingEntry<T> PickEntryFrom<T>(List<LootingEntry<T>> pool)
         {
             float totalWeight = 0f;
             foreach (var e in pool) totalWeight += e.Weight;
@@ -217,7 +217,7 @@ namespace Project.Core
             return pool[pool.Count - 1];
         }
 
-        int ResolveCount(ILootingEntry entry)
+        static int ResolveCount(ILootingEntry entry)
         {
             return entry.CountMin == entry.CountMax
                 ? entry.CountMin
