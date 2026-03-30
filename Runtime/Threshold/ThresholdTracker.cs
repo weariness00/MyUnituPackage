@@ -15,19 +15,18 @@ namespace Project.Core
             ByValues    // 절댓값 직접 지정
         }
 
-        [SerializeField] private ThresholdDirection direction = ThresholdDirection.Ascending;
-        [SerializeField] private SetupMode setupMode = SetupMode.ByDivision;
-        [SerializeField] private float maxValue = 1f;
-        [SerializeField] private int divisions = 4;
-        [SerializeField] private float[] ratioList = { 0.25f, 0.5f, 0.75f, 1f };
-        [SerializeField] private float[] valueList = { };
+        [SerializeField] public ThresholdDirection direction = ThresholdDirection.Ascending;
+        [SerializeField] public SetupMode setupMode = SetupMode.ByDivision;
+        [SerializeField] public float maxValue = 1f;
+        [SerializeField] public int divisions = 4;
+        [SerializeField] public float[] ratioList = { 0.25f, 0.5f, 0.75f, 1f };
+        [SerializeField] public float[] valueList = { };
 
         public UnityEvent<int> OnThresholdCrossed = new();
         public UnityEvent<int> OnThresholdUncrossed = new();
 
         private List<ThresholdEntry> entryList;
 
-        public ThresholdDirection Direction => direction;
         public IReadOnlyList<ThresholdEntry> Entries => entryList;
         public int CrossedCount { get; private set; }
         public bool IsAllCrossed => CrossedCount >= entryList.Count;
