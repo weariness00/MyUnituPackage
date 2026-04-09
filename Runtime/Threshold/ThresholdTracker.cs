@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Project.Core
+namespace Weariness.Util
 {
     [Serializable]
     public class ThresholdTracker : ISerializationCallbackReceiver

@@ -1,4 +1,4 @@
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// 추첨 항목 하나. Payload(보상 데이터)는 제네릭 T로 받는다.

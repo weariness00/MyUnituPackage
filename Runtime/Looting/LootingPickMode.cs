@@ -1,4 +1,4 @@
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// 추첨 개수 방식.

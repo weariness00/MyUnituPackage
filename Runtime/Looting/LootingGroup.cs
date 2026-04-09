@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// 같은 group_id에 속하는 LootingEntry들의 묶음.

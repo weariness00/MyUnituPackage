@@ -1,4 +1,4 @@
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// N개 추첨 시 중복 허용 여부.

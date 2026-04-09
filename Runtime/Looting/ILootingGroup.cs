@@ -1,4 +1,4 @@
-namespace Project.Core
+namespace Weariness.Util
 {
     public interface ILootingGroup
     {

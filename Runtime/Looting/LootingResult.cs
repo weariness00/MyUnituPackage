@@ -1,4 +1,4 @@
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// 추첨 결과 하나. 디버깅용 SourceGroupId 포함.

@@ -36,7 +36,7 @@ using UnityEngine;
 // var picked  = resolver.PickGroups(sectionGroups, count: 5, LootingDuplicateMode.Disallow);
 // var results = picked.Select(g => resolver.Resolve(g)).ToList();
 
-namespace Project.Core
+namespace Weariness.Util
 {
     /// <summary>
     /// 실제 추첨 실행기. 그룹 추첨과 항목 추첨 두 축으로 구성된다.

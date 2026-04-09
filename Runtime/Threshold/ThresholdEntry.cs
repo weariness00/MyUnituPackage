@@ -1,6 +1,6 @@
 using System;
 
-namespace Project.Core
+namespace Weariness.Util
 {
     [Serializable]
     public struct ThresholdEntry
