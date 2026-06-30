@@ -4,7 +4,11 @@
     "references": [
         "Unity.Collections",
         "Unity.Burst",
-        "Unity.VisualScripting.Core"
+        "Unity.VisualScripting.Core",
+        "Unity.Localization",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
