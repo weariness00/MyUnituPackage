@@ -1,6 +1,6 @@
 {
   "name": "com.weariness.util",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "displayName": "Frequently used Util",
   "description": "자주 사용하는 유틸리티 모음",
   "unity": "2019.4",
@@ -9,5 +9,8 @@
     "email": "ehddn917@gmail.com"
   },
   "dependencies": {
+    "com.unity.localization": "1.5.12",
+    "com.unity.addressables": "2.4.6",
+    "com.cysharp.unitask": "2.5.10"
   }
 }
