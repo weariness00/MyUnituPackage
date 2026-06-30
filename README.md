@@ -204,6 +204,8 @@ foreach (var (key, value) in scoreTable)
 
 주요 API: `Add`, `TryAdd`, `Remove(key)`, `Remove(value)`, `TryGetValue`, `GetValueOrDefault`, `Clear`, `Count`
 
+> 인스펙터: `KeyValueDictionaryDrawer`(Editor)가 폴드 라벨 + ReorderableList(헤더는 항목 수 `Count: N`)로 렌더. 라벨은 폴드 라인에 표시되고 리스트 본문은 그 아래로 그려진다.
+
 ---
 
 ### Wrapping
@@ -427,6 +429,12 @@ GameObject obj = PoolSystem.Get(prefab);
 // 컴포넌트 타입으로 가져오기
 MyComponent comp = PoolSystem.Get<MyComponent>(prefab);
 
+// AssetReferenceGameObject로 가져오기 (Addressable 동기 로드 후 풀링)
+GameObject obj2 = PoolSystem.Get(assetReference);
+
+// AssetReferenceGameObject로 가져오기 (비동기 로드 후 풀링)
+GameObject obj3 = await PoolSystem.GetAsync(assetReference);
+
 // 반환
 PoolSystem.Release(obj);
 PoolSystem.Release(comp);
@@ -434,6 +442,7 @@ PoolSystem.Release(comp);
 
 > 풀에서 꺼낸 오브젝트는 자동으로 `SetActive(true)`, 반환 시 `SetActive(false)`됩니다.
 > `Additive` 씬 로드 시에는 풀이 초기화되지 않습니다.
+> `AssetReferenceGameObject` 오버로드(`Get`/`GetAsync`)는 각각 동기(`WaitForCompletion`)·비동기(`UniTask`)로 로드하며, 로드된 프리팹은 `AssetGUID`로 캐시됩니다. `GetAsync`는 동일 GUID 동시 호출 시 중복 로드를 막습니다. 씬 전환(풀 초기화) 시 해당 Addressable 핸들도 함께 해제됩니다.
 
 ---
 
