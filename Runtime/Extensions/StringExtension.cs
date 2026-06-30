@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -7,6 +8,100 @@ namespace Weariness.Util.Extensions
 {
     public static class StringExtension
     {
+        #region Format
+
+        private static readonly Regex FormatToken = new Regex(
+            @"(?<!\{)\{(?<idx>\d+)\}(?!\})",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        // {key} 형태의 placeholder. key 는 숫자(positional) 또는 단어(named)
+        private static readonly Regex FormatPlaceholder = new Regex(
+            @"\{(?<key>[^{}:\s]+)\}",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        // args 에 들어온 "key:value" 형태의 named 인자
+        private static readonly Regex NamedArgPattern = new Regex(
+            @"^(?<key>[^\s:{}]+):(?<value>.*)$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        public static int GetFormatIndexCount(string token)
+        {
+            // var formatText = DataManager.Instance.GetText(token);
+            string formatText = "";
+            if (string.IsNullOrEmpty(formatText)) return 0;
+            return FormatToken.Matches(formatText).Count;
+        }
+
+        public static bool HasFormatIndex(string token, int findIndex)
+        {
+            // var formatText = DataManager.Instance.GetText(token);
+            string formatText = "";
+            if (string.IsNullOrEmpty(formatText)) return false;
+
+            var matches = FormatToken.Matches(formatText);
+            foreach (Match match in matches)
+            {
+                if (int.Parse(match.Groups["idx"].Value) == findIndex)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 확장 Format.
+        /// - {N} : args 에서 "key:value" 형식의 named 인자를 제외한 후, 남은 순서대로 0,1,2... 매핑
+        /// - {name} : args 중 "name:value" 형식 문자열을 찾아 value 로 치환
+        /// - 매칭 실패 시: 원문 placeholder 를 그대로 두고 Debug.LogError 출력
+        /// </summary>
+        public static string Format(this string text, params object[] args)
+        {
+            if (string.IsNullOrEmpty(text) || args == null || args.Length == 0)
+                return text;
+
+            var positional = new List<object>(args.Length);
+            Dictionary<string, string> named = null;
+
+            foreach (var arg in args)
+            {
+                string s;
+                if (arg is string) s = arg as string;
+                else s = arg.ToString();
+                var namedMatch = NamedArgPattern.Match(s);
+                if (namedMatch.Success)
+                {
+                    named ??= new Dictionary<string, string>();
+                    named[namedMatch.Groups["key"].Value] = namedMatch.Groups["value"].Value;
+                    continue;
+                }
+                positional.Add(arg);
+            }
+
+            return FormatPlaceholder.Replace(text, match =>
+            {
+                var key = match.Groups["key"].Value;
+
+                if (int.TryParse(key, out var idx))
+                {
+                    if (idx >= 0 && idx < positional.Count)
+                        return positional[idx]?.ToString() ?? string.Empty;
+
+                    Debug.LogError($"[StringExtension.Format] index {idx} out of range (positional count: {positional.Count}). text: \"{text}\"");
+                    return match.Value;
+                }
+
+                if (named != null && named.TryGetValue(key, out var value))
+                    return value;
+
+                Debug.LogError($"[StringExtension.Format] named key \"{key}\" not found. text: \"{text}\"");
+                return match.Value;
+            });
+        }
+
+        #endregion
+        
         #region Text Extension
         
         private const string colorPattern = @"<color=#[0-9a-fA-F]{6}>|</color>";
