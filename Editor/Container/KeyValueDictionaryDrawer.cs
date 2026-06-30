@@ -19,7 +19,8 @@ namespace Weariness.Util.Container.Editor
 
             EnsureSync(property);
             var list = GetOrCreateList(property, label);
-            return list.GetHeight();
+            // 폴드 라벨 한 줄 + 간격 + 리스트 본문
+            return EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing + list.GetHeight();
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -30,7 +31,14 @@ namespace Weariness.Util.Container.Editor
             var foldoutRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             isFoldout = EditorGUI.Foldout(foldoutRect, isFoldout, label, true);
             if (isFoldout == false) return;
-            list.DoList(position);
+
+            // 리스트는 폴드 라벨 아래로 내려 그려 라벨이 리스트 헤더에 가려지지 않게 한다.
+            var listRect = new Rect(
+                position.x,
+                foldoutRect.yMax + EditorGUIUtility.standardVerticalSpacing,
+                position.width,
+                position.height - foldoutRect.height - EditorGUIUtility.standardVerticalSpacing);
+            list.DoList(listRect);
         }
 
         // ---------------- internal ----------------
@@ -44,7 +52,8 @@ namespace Weariness.Util.Container.Editor
             var valuesProp = property.FindPropertyRelative("Values");
             var list = new ReorderableList(property.serializedObject, keysProp, true, true, true, true);
 
-            list.drawHeaderCallback = rect => { EditorGUI.LabelField(rect, label); };
+            // 라벨은 위쪽 폴드에서 표시하므로 헤더에는 항목 수만 표시(중복/가림 방지).
+            list.drawHeaderCallback = rect => { EditorGUI.LabelField(rect, $"Count: {keysProp.arraySize}"); };
 
             list.onAddCallback = l =>
             {

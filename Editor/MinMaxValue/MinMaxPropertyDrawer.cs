@@ -1,19 +1,15 @@
 using UnityEditor;
 using UnityEngine;
-using System.Globalization;
 
 namespace Weariness.Util.Editor
 {
-    /// 라벨과 같은 줄에 [Min] ~ [Max] 표시 (필드 내부 라벨 없음)
+    // 1줄: 프로퍼티 라벨 + Min/Max 헤더, 2줄: [min 필드] ~ [max 필드]
     public abstract class MinMaxNumberBaseDrawer : PropertyDrawer
     {
-        const float GapX = 4f;         // 좌우 여백
-        const float GapMid = 8f;       // ~ 좌우 여백
-        const float TildeWidth = 16f;  // "~" 폭
-        const float MinFieldWidth = 40f;
-        const float MaxFieldWidth = 140f;
-        const float CharWidth = 9f;    // 대략적 폰트 문자폭
-        const float ExtraPad = 6f;     // 여유 폭
+        const float GapX = 4f;
+        const float GapMid = 8f;
+        const float GapRow = 2f;
+        const float TildeWidth = 16f;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -22,69 +18,58 @@ namespace Weariness.Util.Editor
             var minProp = property.FindPropertyRelative("_min");
             var maxProp = property.FindPropertyRelative("_max");
 
-            // 라벨을 그리면서, 라벨 오른쪽의 가용 영역을 얻는다
-            Rect afterLabel = EditorGUI.PrefixLabel(position, label);
+            float line = EditorGUIUtility.singleLineHeight;
 
-            // 값 읽기
+            // 1줄: 프로퍼티 라벨 + Min/Max 헤더
+            Rect labelRect = new Rect(position.x, position.y, EditorGUIUtility.labelWidth, line);
+            EditorGUI.LabelField(labelRect, label);
+
+            int oldIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            float usable = position.width - GapX * 2 - TildeWidth - GapMid * 2;
+            float halfW = usable * 0.5f;
+
+            float hx = position.x + GapX;
+            Rect minHeaderRect = new Rect(hx, position.y, halfW, line);
+            Rect maxHeaderRect = new Rect(minHeaderRect.xMax + GapMid + TildeWidth + GapMid, position.y, halfW, line);
+            EditorGUI.LabelField(minHeaderRect, "Min", EditorStyles.centeredGreyMiniLabel);
+            EditorGUI.LabelField(maxHeaderRect, "Max", EditorStyles.centeredGreyMiniLabel);
+
+            // 2줄: 값 필드
+            float y = position.y + line + EditorGUIUtility.standardVerticalSpacing;
+
             double minVal, maxVal;
             Read(minProp, maxProp, out minVal, out maxVal);
 
-            float line = EditorGUIUtility.singleLineHeight;
+            float fx = position.x + GapX;
+            Rect minRect = new Rect(fx, y, halfW, line);
+            fx += halfW + GapMid;
+            Rect tildeRect = new Rect(fx, y, TildeWidth, line);
+            fx += TildeWidth + GapMid;
+            Rect maxRect = new Rect(fx, y, halfW, line);
 
-            // 필드 폭 추정 (문자열 길이 기반)
-            float wMin = Mathf.Clamp(EstimateWidthForValue(minVal), MinFieldWidth, MaxFieldWidth);
-            float wMax = Mathf.Clamp(EstimateWidthForValue(maxVal), MinFieldWidth, MaxFieldWidth);
-
-            // 가용 폭 내에서 배치
-            float usable = afterLabel.width - GapX * 2 - TildeWidth - GapMid * 2;
-            if (wMin + wMax > usable)
-            {
-                wMin = wMax = usable * 0.5f;
-            }
-
-            Rect row = new Rect(afterLabel.x, position.y, afterLabel.width, line);
-            Rect minRect   = new Rect(row.x + GapX, row.y, wMin, row.height);
-            Rect tildeRect = new Rect(minRect.xMax + GapMid, row.y, TildeWidth, row.height);
-            Rect maxRect   = new Rect(tildeRect.xMax + GapMid, row.y, wMax, row.height);
-
-            // 입력 (필드 라벨 없음)
             minVal = DrawValue(minRect, minVal);
             EditorGUI.LabelField(tildeRect, "~", EditorStyles.centeredGreyMiniLabel);
             maxVal = DrawValue(maxRect, maxVal);
 
-            // 값 되쓰기
             Write(minProp, maxProp, minVal, maxVal);
 
+            EditorGUI.indentLevel = oldIndent;
             EditorGUI.EndProperty();
             property.serializedObject.ApplyModifiedProperties();
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return EditorGUIUtility.singleLineHeight; // 한 줄만 사용
+            float line = EditorGUIUtility.singleLineHeight;
+            return line + EditorGUIUtility.standardVerticalSpacing + line;
         }
 
         // ------ 타입별 훅 ------
         protected abstract void Read(SerializedProperty min, SerializedProperty max, out double outMin, out double outMax);
         protected abstract void Write(SerializedProperty min, SerializedProperty max, double inMin, double inMax);
         protected abstract double DrawValue(Rect rect, double value);
-
-        // 폭 추정: 부동소수는 소수 5자리까지만 고려(폭 과다 방지)
-        protected virtual float EstimateWidthForValue(double v)
-        {
-            string s = FormatForWidth(v);
-            return s.Length * CharWidth + ExtraPad;
-        }
-
-        protected virtual string FormatForWidth(double v)
-        {
-            if (double.IsNaN(v) || double.IsInfinity(v)) return "0";
-            if (IsEffectivelyInteger(v)) return ((long)v).ToString(CultureInfo.InvariantCulture);
-            return v.ToString("0.#####", CultureInfo.InvariantCulture);
-        }
-
-        static bool IsEffectivelyInteger(double v)
-            => System.Math.Abs(v - System.Math.Round(v)) < 1e-9;
     }
 
     // int
@@ -99,9 +84,6 @@ namespace Weariness.Util.Editor
 
         protected override double DrawValue(Rect rect, double value)
         { return EditorGUI.IntField(rect, (int)value); }
-
-        protected override string FormatForWidth(double v)
-        { return ((long)v).ToString(CultureInfo.InvariantCulture); }
     }
 
     // long
@@ -131,16 +113,12 @@ namespace Weariness.Util.Editor
 #if UNITY_2021_2_OR_NEWER
             return EditorGUI.LongField(rect, (long)value);
 #else
-            // 아주 구버전 폴백: IntField 사용 (범위 주의)
             long v = (long)value;
             int shown = v > int.MaxValue ? int.MaxValue : (v < int.MinValue ? int.MinValue : (int)v);
             int typed = EditorGUI.IntField(rect, shown);
             return (long)typed;
 #endif
         }
-
-        protected override string FormatForWidth(double v)
-        { return ((long)v).ToString(CultureInfo.InvariantCulture); }
     }
 
     // float
@@ -155,9 +133,6 @@ namespace Weariness.Util.Editor
 
         protected override double DrawValue(Rect rect, double value)
         { return EditorGUI.FloatField(rect, (float)value); }
-
-        protected override string FormatForWidth(double v)
-        { return ((float)v).ToString("0.#####", CultureInfo.InvariantCulture); }
     }
 
     // double
@@ -188,11 +163,8 @@ namespace Weariness.Util.Editor
 #if UNITY_2022_1_OR_NEWER
             return EditorGUI.DoubleField(rect, value);
 #else
-            return EditorGUI.FloatField(rect, (float)value); // 폴백
+            return EditorGUI.FloatField(rect, (float)value);
 #endif
         }
-
-        protected override string FormatForWidth(double v)
-        { return v.ToString("0.#####", CultureInfo.InvariantCulture); }
     }
 }

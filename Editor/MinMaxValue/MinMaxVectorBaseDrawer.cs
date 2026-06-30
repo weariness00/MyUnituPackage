@@ -21,9 +21,21 @@ namespace Weariness.Util.Editor
             int rows = GetComponentCount(minProp);
             float line = EditorGUIUtility.singleLineHeight;
 
-            // 첫 줄: 라벨만
-            Rect labelRect = new Rect(position.x, position.y, position.width, line);
+            // 첫 줄: 프로퍼티 라벨 + Min/Max 컬럼 헤더
+            Rect labelRect = new Rect(position.x, position.y, EditorGUIUtility.labelWidth, line);
             EditorGUI.LabelField(labelRect, label);
+
+            int oldIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            // 헤더 위치 계산 (SplitRow와 동일한 레이아웃)
+            float headerUsable = position.width - GapX * 2 - TildeWidth - GapMid * 2;
+            float headerHalf = headerUsable * 0.5f;
+            float headerX = position.x + GapX;
+            Rect minHeaderRect = new Rect(headerX, position.y, headerHalf, line);
+            Rect maxHeaderRect = new Rect(minHeaderRect.xMax + GapMid + TildeWidth + GapMid, position.y, headerHalf, line);
+            EditorGUI.LabelField(minHeaderRect, "Min", EditorStyles.centeredGreyMiniLabel);
+            EditorGUI.LabelField(maxHeaderRect, "Max", EditorStyles.centeredGreyMiniLabel);
 
             // 값 줄 시작 위치
             float y = position.y + line + EditorGUIUtility.standardVerticalSpacing;
@@ -97,36 +109,41 @@ namespace Weariness.Util.Editor
                     break;
             }
 
+            EditorGUI.indentLevel = oldIndent;
             EditorGUI.EndProperty();
             property.serializedObject.ApplyModifiedProperties();
         }
 
+        // 축 라벨을 min 필드의 GUIContent로 전달 — indentLevel 영향 없이 확실히 표시됨
         (float, float) DrawRowFloat(char axis, float min, float max, Rect row)
         {
-            SplitRow(row, out Rect axisRect, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
-            EditorGUI.LabelField(axisRect, axis.ToString(), EditorStyles.centeredGreyMiniLabel);
-            min = EditorGUI.FloatField(leftRect, min);
+            SplitRow(row, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
+            var oldLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = AxisLabelWidth;
+            min = EditorGUI.FloatField(leftRect, new GUIContent(axis.ToString()), min);
             EditorGUI.LabelField(tildeRect, "~", EditorStyles.centeredGreyMiniLabel);
             max = EditorGUI.FloatField(rightRect, max);
+            EditorGUIUtility.labelWidth = oldLabelWidth;
             return (min, max);
         }
 
         (int, int) DrawRowInt(char axis, int min, int max, Rect row)
         {
-            SplitRow(row, out Rect axisRect, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
-            EditorGUI.LabelField(axisRect, axis.ToString(), EditorStyles.centeredGreyMiniLabel);
-            min = EditorGUI.IntField(leftRect, min);
+            SplitRow(row, out Rect leftRect, out Rect tildeRect, out Rect rightRect);
+            var oldLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = AxisLabelWidth;
+            min = EditorGUI.IntField(leftRect, new GUIContent(axis.ToString()), min);
             EditorGUI.LabelField(tildeRect, "~", EditorStyles.centeredGreyMiniLabel);
             max = EditorGUI.IntField(rightRect, max);
+            EditorGUIUtility.labelWidth = oldLabelWidth;
             return (min, max);
         }
 
-        void SplitRow(Rect row, out Rect axis, out Rect left, out Rect tilde, out Rect right)
+        void SplitRow(Rect row, out Rect left, out Rect tilde, out Rect right)
         {
-            float usableW = row.width - GapX * 2 - AxisLabelWidth - TildeWidth - GapMid * 2;
+            float usableW = row.width - GapX * 2 - TildeWidth - GapMid * 2;
             float halfW = usableW * 0.5f;
-            axis = new Rect(row.x + GapX, row.y, AxisLabelWidth, row.height);
-            left = new Rect(axis.xMax, row.y, halfW, row.height);
+            left = new Rect(row.x + GapX, row.y, halfW, row.height);
             tilde = new Rect(left.xMax + GapMid, row.y, TildeWidth, row.height);
             right = new Rect(tilde.xMax + GapMid, row.y, halfW, row.height);
         }
