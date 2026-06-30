@@ -45,9 +45,10 @@ namespace Util
             
             var obj = PoolInstantiate();
             
-            if (spawnPlaceType == SpawnPlaceType.Transform && isSameLayer && obj is GameObject go) go.layer = spawnPlaceList[_spawnPlaceCount].gameObject.layer;
+            if (spawnPlace is TransformSpawnPlace tp && tp.isSameLayer && obj is GameObject go)
+                go.layer = tp.GetCurrentLayer();
 
-            onSpawnSuccessAction.Invoke(obj);
+            onSpawnSuccessAction?.Invoke(obj);
         }
     }
 
